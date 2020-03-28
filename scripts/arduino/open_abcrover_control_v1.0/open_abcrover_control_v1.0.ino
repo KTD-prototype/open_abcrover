@@ -28,7 +28,7 @@ float quat_w, quat_x, quat_y, quat_z;
 
 //parameters for motors/encoders
 volatile byte pulse_L, last_pulse_L, pulse_R, last_pulse_R;
-volatile long count_L = 0, count_R = 0;
+volatile long encoder_count_L = 0, encoder_count_R = 0;
 int pwm_L, pwm_R; // pwm output for motor driver
 float battery1_voltage, battery2_voltage;
 
@@ -89,6 +89,8 @@ void loop() {
       pwm_R = Serial.read();
 
       // send data
+      Serial.println(encoder_count_L);
+      Serial.println(encoder_count_R);
       Serial.println(quat_w);
       Serial.println(quat_x);
       Serial.println(quat_y);
@@ -98,7 +100,6 @@ void loop() {
     }
   }
 }
-
 
 // func at the timer interrupt. Just turn on a flag and actual procedure will in the main loop.
 void interrupt() {
