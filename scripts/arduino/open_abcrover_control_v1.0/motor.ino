@@ -7,6 +7,7 @@ void motor_drive(int left_pwm, int right_pwm) {
   md.setM2Speed(right_pwm);
 }
 
+
 int regulate_output(int pwm_value) {
   if (pwm_value > MAXIMUM_OUTPUT) {
     pwm_value = MAXIMUM_OUTPUT;

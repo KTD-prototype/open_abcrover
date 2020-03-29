@@ -1,5 +1,3 @@
-
-
 // func at the HW interrupt. read encoders.
 void encoder_read() {
   //  refresh each value if it is changed

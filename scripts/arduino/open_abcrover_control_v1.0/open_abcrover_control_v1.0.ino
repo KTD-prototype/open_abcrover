@@ -16,26 +16,22 @@
 #define ENC_RB 19 // right motor, phaseB
 #define volt_input1 A2 // voltage monitor
 #define volt_input2 A3 // voltage monitor
+#define alert_led1 22 // battery1 voltage alert
+#define alert_led2 24 // battery2 voltage alert
 
 // constants for motors
 #define PULSE_PER_ROUND 723.24 // encoder pulse resolution * gear ratio
 #define MAXIMUM_OUTPUT 200 // maximum pwm output for motor
 
 // flag to control whether timer interruption is ignited or not
-volatile bool interrupt_flag = false;
+volatile bool timer_interrupt_flag = false;
 
 //paramters to count time
 int time1, time2, time3, past_time;
 
-//parameters to store quaternions
-float quat_w, quat_x, quat_y, quat_z;
-
 //parameters for motors/encoders
 volatile byte pulse_L, last_pulse_L, pulse_R, last_pulse_R;
 volatile long encoder_count_L = 0, encoder_count_R = 0;
-int pwm_L, pwm_R; // pwm output for motor driver
-float battery1_voltage, battery2_voltage;
-
 
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
@@ -87,48 +83,56 @@ void setup() {
 
 void loop() {
 
-  // when timer interruption was ingnited
-  if (interrupt_flag == true) {
-    get_IMUdata();
-    //    print_time();
-    interrupt_flag = false; // toggle the flag again
+  //parameters to store quaternions(w,x,y,z)
+  float quaternions[4];
+  if (timer_interrupt_flag == true) { // get imu data at timer interruption
+    get_quaternion_data(quaternions);
+    timer_interrupt_flag = false; // toggle the flag again
   }
 
-  // monitor battery voltages(divided into 1/4 : 4s14.8V to 1s3.7V)
-  battery1_voltage = analogRead(volt_input1) * 4 * 5 / 1023;
-  battery2_voltage = analogRead(volt_input2) * 4 * 5 / 1023;
 
-  // drive the motor when battery is enough
-  if (battery2_voltage > 13.6) {
-    motor_drive(pwm_L, pwm_R);
-  }
-  else {
-    motor_drive(0, 0);
-  }
+  // check the battery voltage (divided by 4, from 14.8V to 3.7V at nominal voltage)
+  float battery1_voltage = analogRead(volt_input1) * 4 * 5 / 1023;
+  float battery2_voltage = analogRead(volt_input2) * 4 * 5 / 1023;
+
+
+  // prepare parameters for motor output before receiving commands
+  int pwm_L, pwm_R;
 
   // communicate with host PC
   if (Serial.available() > 2) {
     if (Serial.read() == 'H') {//only when received data starts from 'H'
-      // read data
+      // read data : pwm command for motors
       pwm_L = Serial.read();
       pwm_R = Serial.read();
 
-      // send data
+      // send data : data of encoders and IMU
       Serial.println(encoder_count_L);
       Serial.println(encoder_count_R);
-      Serial.println(quat_w);
-      Serial.println(quat_x);
-      Serial.println(quat_y);
-      Serial.println(quat_z);
+      Serial.println(quaternions[0]);
+      Serial.println(quaternions[1]);
+      Serial.println(quaternions[2]);
+      Serial.println(quaternions[3]);
 
       // if com speed is fast enough
       //      Serial.println(battery1_voltage);
       //      Serial.println(battery2_voltage);
     }
   }
+
+  // drive motors based on command
+  if (battery2_voltage > 13.5) {// when the battery is enough
+    motor_drive(pwm_L, pwm_R);
+  }
+  else { // if not
+    motor_drive(0, 0);
+  }
+
+  // voltage alert by leds
+  voltage_alert(battery1_voltage, battery2_voltage);
 }
 
 // function for timer interrupt : toggle the flag and process will be in the main.
 void interrupt() {
-  interrupt_flag = true;
+  timer_interrupt_flag = true;
 }
