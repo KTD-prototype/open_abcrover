@@ -21,24 +21,13 @@ double euler_x, euler_y, euler_z; //parameters for euler angle
 #define LSB 16384 //bno055 deals quaternion data at 2^14(=16384)LSB, that means raw data "1" indicates 1/LSB in actual(physical) data.
 
 
-void get_IMUdata() {
+void get_quaternion_data(float quat_data[4]) {
   // get a new data (quaternion data) from the IMU
   imu::Quaternion quat = bno.getQuat();
 
   // store into parameters.
-  quat_w = quat.w();
-  quat_x = quat.x();
-  quat_y = quat.y();
-  quat_z = quat.z();
-
-  //   print the data
-  //  Serial.print("qW: ");
-  //  Serial.print(quat.w(), 3);
-  //  Serial.print(" qX: ");
-  //  Serial.print(quat.x(), 3);
-  //  Serial.print(" qY: ");
-  //  Serial.print(quat.y(), 3);
-  //  Serial.print(" qZ: ");
-  //  Serial.print(quat.z(), 3);
-  //  Serial.print("\t\t");
+  quat_data[0] = quat.w();
+  quat_data[1] = quat.x();
+  quat_data[2] = quat.y();
+  quat_data[3] = quat.z();
 }
