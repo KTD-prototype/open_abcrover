@@ -26,8 +26,8 @@ void get_quaternion_data(float quat_data[4]) {
   imu::Quaternion quat = bno.getQuat();
 
   // store into parameters.
-  quat_data[0] = quat.w();
-  quat_data[1] = quat.x();
-  quat_data[2] = quat.y();
-  quat_data[3] = quat.z();
+  quat_data[0] = quat.x();
+  quat_data[1] = quat.y();
+  quat_data[2] = quat.z();
+  quat_data[3] = quat.w();
 }
