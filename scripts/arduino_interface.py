@@ -6,10 +6,12 @@
 import rospy
 import serial
 import time
+import signal
 from std_msgs.msg import Int8MultiArray
 from sensor_msgs.msg import Imu
 from wheel_odometry.msg import Encoder_2wheel
 
+cont = True
 g_pwm_L = 0
 g_pwm_R = 0
 
@@ -33,7 +35,7 @@ def send_data(pwm_L, pwm_R):
 
 
 def receive_data():
-    NUMBER_OF_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
+    NUMBER_OF_DATA = 2  # 2 encoders, 4 quaternions, 2 battery voltages
     received_data = [0.0] * NUMBER_OF_DATA
     reset_flag = False
 
@@ -44,27 +46,28 @@ def receive_data():
         # TODO:procedure when arduino is reset >> turn reset_flag to True
         if received_data[i] == '************':
             reset_flag = True
-            pass
 
         received_data[i] = float(received_data[i])
 
     if reset_flag == True:
         pass  # todo:process when arduino is reset
+
     else:
         # get and publish encoder info for wheel odometry
-        encoders_data.left_encoder = received_data[0]
-        encoders_data.right_encoder = received_data[1]
-        pub_encoders.publish(encoders_data)
-
-        # get and publish posture angle information:x,y,z,w
-        imu_data.orientation.x = received_data[2]
-        imu_data.orientation.y = received_data[3]
-        imu_data.orientation.z = received_data[4]
-        imu_data.orientation.w = received_data[5]
-        imu_pub.publish(imu_data)
-
-        check_battery_voltage(received_data[6], 1)
-        check_battery_voltage(received_data[7], 2)
+        print(received_data)
+        # encoders_data.left_encoder = received_data[0]
+        # encoders_data.right_encoder = received_data[1]
+        # pub_encoders.publish(encoders_data)
+        #
+        # # get and publish posture angle information:x,y,z,w
+        # imu_data.orientation.x = received_data[2]
+        # imu_data.orientation.y = received_data[3]
+        # imu_data.orientation.z = received_data[4]
+        # imu_data.orientation.w = received_data[5]
+        # imu_pub.publish(imu_data)
+        #
+        # check_battery_voltage(received_data[6], 1)
+        # check_battery_voltage(received_data[7], 2)
 
 
 def check_battery_voltage(voltage, num):
@@ -83,7 +86,13 @@ def callback_update_pwm(pwm_command):
     g_pwm_R = pwm_command.data[1]
 
 
-if __name__ == '__main__':
+def handler(signal, frame):
+    global cont
+    cont = False
+
+
+def initializer():
+    global cont
     rospy.init_node('arduino_interface')
 
     # publisher for encoders information
@@ -104,15 +113,23 @@ if __name__ == '__main__':
     print("started!")
 
     rate = rospy.Rate(100)
-    while not rospy.is_shutdown():
+    while cont:
         try:
-            while serial.inWaiting() < 32:
-                pass
-
             send_data(g_pwm_L, g_pwm_R)
+            while serial.inWaiting() < 2:
+                pass
             receive_data()
 
-        except IOError:
-            pass
+        except KeyboardInterrupt:
+            cont = False
 
         rate.sleep()
+
+    serial.close()
+    rospy.signal_shutdown('finished!')
+    rospy.spin()
+
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGINT, handler)
+    initializer()
