@@ -18,15 +18,14 @@ g_pwm_R = 0
 
 serial = serial.Serial('/dev/MEGA#1', 230400)
 
+
 # function to send command to arduino
-
-
 def send_data(pwm_L, pwm_R):
     # print(pwm_L, pwm_R)
 
     # shift pwm command : from -127 - 128 to 0 - 255
-    # pwm_L = shift_pwm(pwm_L)
-    # pwm_R = shift_pwm(pwm_R)
+    pwm_L = shift_pwm(pwm_L)
+    pwm_R = shift_pwm(pwm_R)
 
     # generate a command as a series of characters
     command = ['H', chr(pwm_L), chr(pwm_R)]
@@ -34,8 +33,13 @@ def send_data(pwm_L, pwm_R):
     serial.write(command)  # send
 
 
+def shift_pwm(pwm_data):
+    pwm_data = pwm_data + 127
+    return pwm_data
+
+
 def receive_data():
-    NUMBER_OF_DATA = 2  # 2 encoders, 4 quaternions, 2 battery voltages
+    NUMBER_OF_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
     received_data = [0.0] * NUMBER_OF_DATA
     reset_flag = False
 
@@ -53,21 +57,21 @@ def receive_data():
         pass  # todo:process when arduino is reset
 
     else:
-        # get and publish encoder info for wheel odometry
+        get and publish encoder info for wheel odometry
         print(received_data)
-        # encoders_data.left_encoder = received_data[0]
-        # encoders_data.right_encoder = received_data[1]
-        # pub_encoders.publish(encoders_data)
-        #
-        # # get and publish posture angle information:x,y,z,w
-        # imu_data.orientation.x = received_data[2]
-        # imu_data.orientation.y = received_data[3]
-        # imu_data.orientation.z = received_data[4]
-        # imu_data.orientation.w = received_data[5]
-        # imu_pub.publish(imu_data)
-        #
-        # check_battery_voltage(received_data[6], 1)
-        # check_battery_voltage(received_data[7], 2)
+        encoders_data.left_encoder = received_data[0]
+        encoders_data.right_encoder = received_data[1]
+        pub_encoders.publish(encoders_data)
+
+        # get and publish posture angle information:x,y,z,w
+        imu_data.orientation.x = received_data[2]
+        imu_data.orientation.y = received_data[3]
+        imu_data.orientation.z = received_data[4]
+        imu_data.orientation.w = received_data[5]
+        imu_pub.publish(imu_data)
+
+        check_battery_voltage(received_data[6], 1)
+        check_battery_voltage(received_data[7], 2)
 
 
 def check_battery_voltage(voltage, num):
@@ -116,7 +120,7 @@ def initializer():
     while cont:
         try:
             send_data(g_pwm_L, g_pwm_R)
-            while serial.inWaiting() < 2:
+            while serial.inWaiting() < 32:
                 pass
             receive_data()
 
