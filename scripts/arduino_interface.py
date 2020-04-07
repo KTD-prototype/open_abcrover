@@ -14,6 +14,7 @@ from wheel_odometry.msg import Encoder_2wheel
 cont = True
 g_pwm_L = 0
 g_pwm_R = 0
+G_NUM_OF_RECEIVE_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
 
 
 serial = serial.Serial('/dev/MEGA#1', 230400)
@@ -40,11 +41,11 @@ def shift_pwm(pwm_data):
 
 
 def receive_data():
-    NUMBER_OF_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
-    received_data = [0.0] * NUMBER_OF_DATA
+    global G_NUM_OF_RECEIVE_DATA
+    received_data = [0.0] * G_NUM_OF_RECEIVE_DATA
     reset_flag = False
 
-    for i in range(NUMBER_OF_DATA):  # read 8 data line by line
+    for i in range(G_NUM_OF_RECEIVE_DATA):  # read 8 data line by line
         received_data[i] = serial.readline()
         received_data[i] = received_data[i].replace('\r\n', '')
 
@@ -97,7 +98,7 @@ def handler(signal, frame):
 
 
 def arduino_interface_main():
-    global cont
+    global cont, G_NUM_OF_RECEIVE_DATA
     rospy.init_node('arduino_interface')
 
     # publisher for encoders information
@@ -121,7 +122,7 @@ def arduino_interface_main():
     while cont:
         try:
             send_data(g_pwm_L, g_pwm_R)
-            while serial.inWaiting() < 32:
+            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA / 4:
                 pass
             receive_data()
 
