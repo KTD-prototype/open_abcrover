@@ -3,6 +3,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# global paramters for velocity control
+# current velocity
+g_linearvel = 0.0
+g_angularvel = 0.0
+# past velocity at last loop
+g_past_linearvel = 0.0
+g_past_angularvel = 0.0
+
+
+def callback_update_odometry(odometry):
+    global g_linearvel, g_angularvel
+    g_linearvel = odometry.twist.twist.linear.x
+    g_angularvel = odometry.twist.twist.angular.z
+
 
 def velocity_controller_main():
     global cont
@@ -15,6 +29,19 @@ def velocity_controller_main():
     # subscriber for wheel odometry
     rospy.Subscriber('wheel_odometry_2wheel', Odometry,
                      callback_update_odometry, queue_size=1)
+
+    rate = rospy.Rate(100)
+    while cont:
+        try:
+            velocity_control(g_linearvel, g_past_linearvel,
+                             g_angularvel, g_past_angularvel)
+
+        except KeyboardInterrupt:
+            cont = False
+
+        rate.sleep()
+    rospy.signal_shutdown('finished!')
+    rospy.spin()
 
 
 if __name__ == '__main__':
