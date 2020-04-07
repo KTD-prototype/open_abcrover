@@ -58,7 +58,7 @@ def receive_data():
         pass  # todo:process when arduino is reset
 
     else:
-        get and publish encoder info for wheel odometry
+        # get and publish encoder info for wheel odometry
         print(received_data)
         encoders_data.left_encoder = received_data[0]
         encoders_data.right_encoder = received_data[1]
