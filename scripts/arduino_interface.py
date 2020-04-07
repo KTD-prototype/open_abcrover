@@ -104,7 +104,9 @@ def arduino_interface_main():
     while cont:
         try:
             send_data(g_pwm_L, g_pwm_R)
-            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA * 4:
+            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA * 3:
+                # todo : at first I thought that waiting data should be more than 4bytes/data
+                #        but it doesn't work
                 pass
             receive_data()
 
