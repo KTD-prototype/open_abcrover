@@ -111,7 +111,7 @@ def arduino_interface_main():
     imu_data.header.frame_id = 'map'
 
     # subscriber for pwm data
-    rospy.Subscriber('pwm', Int8MultiArray, callback_update_pwm)
+    rospy.Subscriber('pwm_commands', Int8MultiArray, callback_update_pwm)
 
     # wait until arduino gets ready
     time.sleep(5)
