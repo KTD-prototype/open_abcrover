@@ -23,7 +23,7 @@ serial = serial.Serial('/dev/MEGA#1', 230400)
 def send_data(pwm_L, pwm_R):
     # print(pwm_L, pwm_R)
 
-    # shift pwm command : from -127 - 128 to 0 - 255
+    # shift pwm command : from -127 - 127 to 0 - 254
     pwm_L = shift_pwm(pwm_L)
     pwm_R = shift_pwm(pwm_R)
 
@@ -33,6 +33,7 @@ def send_data(pwm_L, pwm_R):
     serial.write(command)  # send
 
 
+# shift pwm command : from -127 - 127 to 0 - 254
 def shift_pwm(pwm_data):
     pwm_data = pwm_data + 127
     return pwm_data
