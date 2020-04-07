@@ -119,8 +119,8 @@ if __name__ == '__main__':
     pub_pwm_commands = rospy.Publisher(
         'pwm_commands', Int8MultiArray, queue_size=1)
     pwm_command = Int8MultiArray()
-    pwm_command.data.append(0)
-    pwm_command.data.append(0)
+    pwm_command.data.append(0)  # for left motor commnad
+    pwm_command.data.append(0)  # for right motor command
 
     # subscriber for wheel odometry
     rospy.Subscriber('wheel_odometry_2wheel', Odometry,

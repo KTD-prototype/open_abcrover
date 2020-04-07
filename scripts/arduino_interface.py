@@ -99,6 +99,26 @@ def handler(signal, frame):
 
 def arduino_interface_main():
     global cont, G_NUM_OF_RECEIVE_DATA
+
+    rate = rospy.Rate(100)
+    while cont:
+        try:
+            send_data(g_pwm_L, g_pwm_R)
+            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA * 4:
+                pass
+            receive_data()
+
+        except KeyboardInterrupt:
+            cont = False
+
+        rate.sleep()
+
+    serial.close()
+    rospy.signal_shutdown('finished!')
+    rospy.spin()
+
+
+if __name__ == '__main__':
     rospy.init_node('arduino_interface')
 
     # publisher for encoders information
@@ -118,24 +138,8 @@ def arduino_interface_main():
     time.sleep(5)
     print("started!")
 
-    rate = rospy.Rate(100)
-    while cont:
-        try:
-            send_data(g_pwm_L, g_pwm_R)
-            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA / 4:
-                pass
-            receive_data()
-
-        except KeyboardInterrupt:
-            cont = False
-
-        rate.sleep()
-
-    serial.close()
-    rospy.signal_shutdown('finished!')
-    rospy.spin()
-
-
-if __name__ == '__main__':
+    # signal handler for KeyboardInterrupt
     signal.signal(signal.SIGINT, handler)
+
+    # main function
     arduino_interface_main()
