@@ -22,7 +22,7 @@ g_past_angularvel = 0.0  # z
 g_cmd_linear = 0.0  # x
 g_cmd_angular = 0.0  # z
 # activation rate of this node
-G_RATE = 20  # Hz
+G_RATE = 10  # Hz
 
 
 # velocity control
@@ -30,10 +30,10 @@ def velocity_control(linear_vel, past_linear_vel, angular_vel, past_angular_vel,
     global G_RATE
 
     # local parameters
-    Pgain_LINEAR = 5.0
-    Dgain_LINEAR = 0.05
-    Pgain_ANGULAR = 2.0
-    Dgain_ANGULAR = 0.02
+    Pgain_LINEAR = 100.0
+    Dgain_LINEAR = 1.0
+    Pgain_ANGULAR = 40.0
+    Dgain_ANGULAR = 0.4
     pwm_offset = 0.0  # command offset for robot rotation
     pwm_L = 0  # command for left motor
     pwm_R = 0  # command for right motor
