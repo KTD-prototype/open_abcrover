@@ -96,7 +96,7 @@ def handler(signal, frame):
     cont = False
 
 
-def initializer():
+def arduino_interface_main():
     global cont
     rospy.init_node('arduino_interface')
 
@@ -137,4 +137,4 @@ def initializer():
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
-    initializer()
+    arduino_interface_main()
