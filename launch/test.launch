@@ -1,0 +1,10 @@
+<launch>
+  <node name="arduino_interface" pkg="open_abcrover" type="arduino_interface.py" output="screen"/>
+  <node name="velocity_controller" pkg="open_abcrover" type="velocity_controller.py" output="screen"/>
+
+  <node name="wheel_odometry"   pkg="wheel_odometry" type="wheel_odometry_2wheel.py" output="screen">
+    <param name="pulse_per_round" value="723.24"/>
+    <param name="wheel_diameter" value="0.1524"/>
+    <param name="tread" value="0.298"/>
+  </node>
+</launch>
