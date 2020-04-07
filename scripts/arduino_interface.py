@@ -50,7 +50,7 @@ def receive_data():
         received_data[i] = received_data[i].replace('\r\n', '')
 
         # TODO:procedure when arduino is reset >> turn reset_flag to True
-        if received_data[i] == '************':
+        if received_data[i] == '*************':
             reset_flag = True
 
         received_data[i] = float(received_data[i])
