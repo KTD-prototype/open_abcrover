@@ -54,10 +54,10 @@ class Velocity_controller():
 
     def velocity_control(self, cmd_linear, cmd_angular):
         # local parameters
-        Pgain_LINEAR = 100.0
-        Dgain_LINEAR = 1.0
-        Pgain_ANGULAR = 40.0
-        Dgain_ANGULAR = 0.4
+        Pgain_LINEAR = 40.0
+        Dgain_LINEAR = 3.0
+        Pgain_ANGULAR = 1.0
+        Dgain_ANGULAR = 0.0
         pwm_offset = 0.0  # command offset for robot rotation
         pwm_L = 0  # command for left motor
         pwm_R = 0  # command for right motor

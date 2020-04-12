@@ -1,10 +1,10 @@
 void motor_drive(int left_pwm, int right_pwm) {
-  // regulate pwm and remap from -255 - 255 to -400 - 400(due to config of the motor drive library)
-  left_pwm = regulate_output(left_pwm) * 80 / 51;
-  right_pwm = regulate_output(right_pwm) * 80 / 51;
+  // regulate pwm and remap from 0-255 to 0-400(due to config of the motor drive library)
+  left_pwm = regulate_output(left_pwm * 80 / 51);
+  right_pwm = regulate_output(right_pwm * 80 / 51);
 
-  md.setM1Speed(left_pwm);
-  md.setM2Speed(right_pwm);
+  md.setM2Speed(left_pwm);
+  md.setM1Speed(right_pwm);
 }
 
 

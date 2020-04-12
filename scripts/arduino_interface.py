@@ -1,8 +1,8 @@
-# code to send PWM command and receive hardware information from arduino or other MCU
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
+# code to send PWM command and receive hardware information from arduino or other MCU
 import rospy
 import serial
 import time
@@ -32,6 +32,7 @@ def send_data(pwm_L, pwm_R):
     command = ['H', chr(pwm_L), chr(pwm_R)]
     serial.reset_input_buffer()
     serial.write(command)  # send
+    # print(pwm_L, pwm_R)
 
 
 # shift pwm command : from -127 - 127 to 0 - 254
