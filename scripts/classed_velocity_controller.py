@@ -32,10 +32,13 @@ class Velocity_controller():
         self.sub_cmd_vel = rospy.Subscriber('cmd_vel', Twist,
                                             self.callback_update_command, queue_size=1)
 
-        self.linear_vel = 0
-        self.past_linear_vel = 0
-        self.angular_vel = 0
-        self.past_angular_vel = 0
+        self.linear_vel = 0.0
+        self.past_linear_vel = 0.0
+        self.err_linear_vel = 0.0
+        self.angular_vel = 0.0
+        self.past_angular_vel = 0.0
+        self.err_angular_vel = 0.0
+        self.ODOM_RATE = 100.0
 
         rospy.spin()
 
@@ -55,23 +58,32 @@ class Velocity_controller():
     def velocity_control(self, cmd_linear, cmd_angular):
         # local parameters
         Pgain_LINEAR = 40.0
-        Dgain_LINEAR = 3.0
+        Dgain_LINEAR = 0.027
+        Igain_LINEAR = 0.0
         Pgain_ANGULAR = 1.0
         Dgain_ANGULAR = 0.0
+        Igain_ANGULAR = 0.0
         pwm_offset = 0.0  # command offset for robot rotation
         pwm_L = 0  # command for left motor
         pwm_R = 0  # command for right motor
-        dt = 1.0 / 10.0  # cycle length (seconds)
+        dt = 1.0 / self.ODOM_RATE  # cycle length (seconds)
+        self.err_linear_vel = self.err_linear_vel + \
+            (cmd_linear - self.linear_vel)
+        self.err_angular_vel = self.err_angular_vel + \
+            (cmd_angular - self.angular_vel)
 
         # PD control for linear velocity (didn't introduce I control to keep the code simple)
         pwm_L = Pgain_LINEAR * (cmd_linear - self.linear_vel) - \
-            Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / dt
+            Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / \
+            dt + Igain_LINEAR * self.err_linear_vel
         pwm_R = -1 * pwm_L
 
         # PD control for angular velocity
         pwm_offset = Pgain_ANGULAR * \
             (cmd_angular - self.angular_vel) - Dgain_ANGULAR * \
-            (self.angular_vel - self.past_angular_vel)
+            (self.angular_vel - self.past_angular_vel) + \
+            Igain_ANGULAR * self.err_angular_vel
+
         pwm_L = pwm_L - pwm_offset
         pwm_R = pwm_R - pwm_offset
 
@@ -79,6 +91,8 @@ class Velocity_controller():
         pwm_L = self.regulate_pwm(pwm_L)
         pwm_R = self.regulate_pwm(pwm_R)
         self.publish_command(pwm_L, pwm_R)
+
+        self.last_time = time.time()
 
     def publish_command(self, pwm_L, pwm_R):
         self.pwm_command.data[0] = pwm_L
@@ -92,6 +106,9 @@ class Velocity_controller():
             pwm = 127
         elif pwm < -127:
             pwm = -127
+
+        if abs(pwm) < 2:
+            pwm = 0
         return pwm
 
 

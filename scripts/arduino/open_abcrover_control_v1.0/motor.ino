@@ -5,6 +5,8 @@ void motor_drive(int left_pwm, int right_pwm) {
 
   md.setM2Speed(left_pwm);
   md.setM1Speed(right_pwm);
+  pwm_L = left_pwm;
+  pwm_R = right_pwm;
 }
 
 

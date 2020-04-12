@@ -21,7 +21,7 @@
 
 // constants for motors
 #define PULSE_PER_ROUND 723.24 // encoder pulse resolution * gear ratio
-#define MAXIMUM_OUTPUT 100 // maximum pwm output for motor
+#define MAXIMUM_OUTPUT 300 // maximum pwm output for motor
 
 // flag to control whether timer interruption is ignited or not
 volatile bool timer_interrupt_flag = false;
@@ -70,6 +70,16 @@ void setup() {
         // change bitrate of I2C comm to 400kbps (100kbps, usual)
         Wire.setClock(400000);
 
+        // change pwm frequency
+        TCCR2B = (TCCR2B & 0b11111000) | 0x01; //31.37255 [kHz]
+        // TCCR2B = (TCCR2B & 0b11111000) | 0x02; //3.92116 [kHz]
+        // TCCR2B = (TCCR2B & 0b11111000) | 0x03; //980.39 [Hz]
+        // TCCR2B = (TCCR2B & 0b11111000) | 0x04; //490.20 [Hz]
+        // TCCR2B = (TCCR2B & 0b11111000) | 0x05; //245.10 [Hz]
+        // TCCR2B = (TCCR2B & 0b11111000) | 0x06; //122.55 [Hz]
+        // TCCR2B = (TCCR2B & 0b11111000) | 0x07; //30.64 [Hz]
+
+
         // setup arduino GPIO
         pinMode(ENC_LA, INPUT_PULLUP);
         pinMode(ENC_LB, INPUT_PULLUP);
@@ -106,6 +116,13 @@ void loop() {
                         pwm_L = shift_pwm(Serial.read());
                         pwm_R = shift_pwm(Serial.read());
 
+                        if(battery2_voltage < 13.5) { //disable motors when battery voltage is not enough
+                                pwm_L = 0;
+                                pwm_R = 0;
+                        }
+
+                        motor_drive(pwm_L, pwm_R);
+
                         // send data : data of encoders and IMU
                         Serial.println(encoder_count_L);
                         Serial.println(encoder_count_R);
@@ -115,22 +132,22 @@ void loop() {
                         Serial.println(quaternions[3]);
 
                         // if com speed is fast enough
-                        // Serial.println(battery1_voltage);
-                        // Serial.println(battery2_voltage);
-                        Serial.println(pwm_L);
-                        Serial.println(pwm_R);
+                        Serial.println(battery1_voltage);
+                        Serial.println(battery2_voltage);
+                        // Serial.println(pwm_L);
+                        // Serial.println(pwm_R);
                 }
         }
 
         // drive motors based on command
-        if (battery2_voltage > 13.5) {// when the battery is enough
-                motor_drive(pwm_L, pwm_R); //2 motors are mounted opposite direction
-        }
-        else { // if not
-                motor_drive(0, 0);
-        }
+        // if (battery2_voltage > 13.5) {// when the battery is enough
+        //         motor_drive(pwm_L, pwm_R); //2 motors are mounted opposite direction
+        // }
+        // else { // if not
+        //         motor_drive(0, 0);
+        // }
 
-        // voltage alert by leds
+        // voltage alert by LEDs
         voltage_alert(battery1_voltage, battery2_voltage);
 }
 

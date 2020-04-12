@@ -23,7 +23,10 @@ serial = serial.Serial('/dev/MEGA#1', 230400)
 # function to send command to arduino
 def send_data(pwm_L, pwm_R):
     # print(pwm_L, pwm_R)
-
+    #
+    # pwm_L = 10
+    # pwm_R = -10
+    # print(pwm_L, pwm_R)
     # shift pwm command : from -127 - 127 to 0 - 254
     pwm_L = shift_pwm(pwm_L)
     pwm_R = shift_pwm(pwm_R)
@@ -32,7 +35,6 @@ def send_data(pwm_L, pwm_R):
     command = ['H', chr(pwm_L), chr(pwm_R)]
     serial.reset_input_buffer()
     serial.write(command)  # send
-    # print(pwm_L, pwm_R)
 
 
 # shift pwm command : from -127 - 127 to 0 - 254
