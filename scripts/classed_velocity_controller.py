@@ -6,7 +6,7 @@
 import rospy
 import signal
 import time
-from std_msgs.msg import Int8MultiArray
+from std_msgs.msg import Int16MultiArray
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
@@ -18,11 +18,11 @@ class Velocity_controller():
         rospy.init_node('velocity_controller', disable_signals=True)
 
         # publisher for pwm command
-        self.pub_pwm_commands = rospy.Publisher(
-            'pwm_commands', Int8MultiArray, queue_size=1)
-        self.pwm_command = Int8MultiArray()
-        self.pwm_command.data.append(0)  # for left motor commnad
-        self.pwm_command.data.append(0)  # for right motor command
+        self.pub_motor_commands = rospy.Publisher(
+            'motor_commands', Int16MultiArray, queue_size=1)
+        self.motor_command = Int16MultiArray()
+        self.motor_command.data.append(0, 0)  # for motor commnad left/right
+        # self.motor_command.data.append(0)  # for right motor command
 
         # subscriber for wheel odometry
         self.sub_odom = rospy.Subscriber('wheel_odometry_2wheel', Odometry,
@@ -63,9 +63,9 @@ class Velocity_controller():
         Pgain_ANGULAR = 1.0
         Dgain_ANGULAR = 0.0
         Igain_ANGULAR = 0.0
-        pwm_offset = 0.0  # command offset for robot rotation
-        pwm_L = 0  # command for left motor
-        pwm_R = 0  # command for right motor
+        command_offset = 0.0  # command offset for robot rotation
+        motor_command_L = 0  # command for left motor
+        motor_command_R = 0  # command for right motor
         dt = 1.0 / self.ODOM_RATE  # cycle length (seconds)
         self.err_linear_vel = self.err_linear_vel + \
             (cmd_linear - self.linear_vel)
@@ -73,43 +73,50 @@ class Velocity_controller():
             (cmd_angular - self.angular_vel)
 
         # PD control for linear velocity (didn't introduce I control to keep the code simple)
-        pwm_L = Pgain_LINEAR * (cmd_linear - self.linear_vel) - \
+        motor_command_L = Pgain_LINEAR * (cmd_linear - self.linear_vel) - \
             Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / \
             dt + Igain_LINEAR * self.err_linear_vel
-        pwm_R = -1 * pwm_L
+        motor_command_R = -1 * motor_command_L
 
         # PD control for angular velocity
-        pwm_offset = Pgain_ANGULAR * \
+        command_offset = Pgain_ANGULAR * \
             (cmd_angular - self.angular_vel) - Dgain_ANGULAR * \
             (self.angular_vel - self.past_angular_vel) + \
             Igain_ANGULAR * self.err_angular_vel
 
-        pwm_L = pwm_L - pwm_offset
-        pwm_R = pwm_R - pwm_offset
+        motor_command_L = motor_command_L - command_offset
+        motor_command_R = motor_command_R - command_offset
 
         # regulate pwm command
-        pwm_L = self.regulate_pwm(pwm_L)
-        pwm_R = self.regulate_pwm(pwm_R)
-        self.publish_command(pwm_L, pwm_R)
+        motor_command_L = self.regulate_and_shift_command(motor_command_L)
+        motor_command_R = self.regulate_and_shift_command(motor_command_R)
+        self.publish_command(motor_command_L, motor_command_R)
 
         self.last_time = time.time()
 
-    def publish_command(self, pwm_L, pwm_R):
-        self.pwm_command.data[0] = pwm_L
-        self.pwm_command.data[1] = pwm_R
-        self.pub_pwm_commands.publish(self.pwm_command)
+    def publish_command(self, command_L, command_R):
+        self.motor_command.data[0] = command_L
+        self.motor_command.data[1] = command_R
+        self.pub_motor_commands.publish(self.motor_command)
         pass
 
     # pwm command regulator
-    def regulate_pwm(self, pwm):
-        if pwm > 127:
-            pwm = 127
-        elif pwm < -127:
-            pwm = -127
+    def regulate_and_shift_command(self, command):
+        # maximum output for motor driver : vnh5019. The maximum value is 400
+        # according to the driver library, but regulated up to 300 for motor
+        # protection drived at 14.8V, higher than nominal voltage : 12V
+        MAXIMUM_OUTPUT = 300
 
-        if abs(pwm) < 2:
-            pwm = 0
-        return pwm
+        # regulate
+        if command > MAXIMUM_OUTPUT:
+            command = MAXIMUM_OUTPUT
+        elif command < -1 * MAXIMUM_OUTPUT:
+            command = -1 * MAXIMUM_OUTPUT
+
+        # shift to ensure it is positive number
+        command = command + 300
+
+        return command
 
 
 if __name__ == '__main__':

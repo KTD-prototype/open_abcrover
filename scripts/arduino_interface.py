@@ -37,12 +37,6 @@ def send_data(pwm_L, pwm_R):
     serial.write(command)  # send
 
 
-# shift pwm command : from -127 - 127 to 0 - 254
-def shift_pwm(pwm_data):
-    pwm_data = pwm_data + 127
-    return pwm_data
-
-
 def receive_data():
     global G_NUM_OF_RECEIVE_DATA
     received_data = [0.0] * G_NUM_OF_RECEIVE_DATA
@@ -88,11 +82,11 @@ def check_battery_voltage(voltage, num):
                            " is low as " + str(voltage) + "[V/cell]")
 
 
-def callback_update_pwm(pwm_command):
+def callback_update_command(command):
     global g_pwm_L, g_pwm_R
     # print(pwm_command.data[0], pwm_command.data[1])
-    g_pwm_L = pwm_command.data[0]
-    g_pwm_R = pwm_command.data[1]
+    g_pwm_L = command.data[0]
+    g_pwm_R = command.data[1]
 
 
 def handler(signal, frame):
@@ -137,7 +131,8 @@ if __name__ == '__main__':
     imu_data.header.frame_id = 'map'
 
     # subscriber for pwm data
-    rospy.Subscriber('pwm_commands', Int8MultiArray, callback_update_pwm)
+    rospy.Subscriber('motor_commands', Int16MultiArray,
+                     callback_update_command)
 
     # wait until arduino gets ready
     time.sleep(5)
