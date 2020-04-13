@@ -19,3 +19,11 @@ int regulate_output(int pwm_value) {
   }
   return pwm_value;
 }
+
+
+
+// shift pwm command range: from 0 - 254 to -254 - 254
+int shift_pwm(int pwm_data){
+        pwm_data = (pwm_data - 127) * 2;
+        return pwm_data;
+}

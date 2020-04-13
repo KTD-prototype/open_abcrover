@@ -113,15 +113,20 @@ void loop() {
         if (Serial.available() > 2) {
                 if (Serial.read() == 'H') {//only when received data starts from 'H'
                         // read data : pwm command for motors
-                        pwm_L = shift_pwm(Serial.read());
-                        pwm_R = shift_pwm(Serial.read());
+                        pwm_L = receive_data();
+                        pwm_R = receive_data();
 
+                        pwm_L = shift_pwm();
+                        pwm_R = shift_pwm():
+
+
+                        // drive motors
                         if(battery2_voltage < 13.5) { //disable motors when battery voltage is not enough
                                 pwm_L = 0;
                                 pwm_R = 0;
                         }
-
                         motor_drive(pwm_L, pwm_R);
+
 
                         // send data : data of encoders and IMU
                         Serial.println(encoder_count_L);
@@ -154,11 +159,4 @@ void loop() {
 // function for timer interrupt : toggle the flag and process will be in the main.
 void interrupt() {
         timer_interrupt_flag = true;
-}
-
-
-// shift pwm command range: from 0 - 254 to -254 - 254
-int shift_pwm(int pwm_data){
-        pwm_data = (pwm_data - 127) * 2;
-        return pwm_data;
 }
