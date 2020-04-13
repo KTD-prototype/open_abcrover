@@ -114,7 +114,7 @@ class Velocity_controller():
             command = -1 * MAXIMUM_OUTPUT
 
         # shift to ensure it is positive number
-        command = command + 300
+        command = command + MAXIMUM_OUTPUT
 
         return command
 
