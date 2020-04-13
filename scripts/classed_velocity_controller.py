@@ -21,7 +21,7 @@ class Velocity_controller():
         self.pub_motor_commands = rospy.Publisher(
             'motor_commands', Int16MultiArray, queue_size=1)
         self.motor_command = Int16MultiArray()
-        self.motor_command.data.append(0, 0)  # for motor commnad left/right
+        self.motor_command.data.extend([0, 0])  # for motor commnad left/right
         # self.motor_command.data.append(0)  # for right motor command
 
         # subscriber for wheel odometry
@@ -88,8 +88,8 @@ class Velocity_controller():
         motor_command_R = motor_command_R - command_offset
 
         # regulate pwm command
-        motor_command_L = self.regulate_and_shift_command(motor_command_L)
-        motor_command_R = self.regulate_and_shift_command(motor_command_R)
+        motor_command_L = self.regulate_command(motor_command_L)
+        motor_command_R = self.regulate_command(motor_command_R)
         self.publish_command(motor_command_L, motor_command_R)
 
         self.last_time = time.time()
@@ -101,7 +101,7 @@ class Velocity_controller():
         pass
 
     # pwm command regulator
-    def regulate_and_shift_command(self, command):
+    def regulate_command(self, command):
         # maximum output for motor driver : vnh5019. The maximum value is 400
         # according to the driver library, but regulated up to 300 for motor
         # protection drived at 14.8V, higher than nominal voltage : 12V
@@ -112,9 +112,6 @@ class Velocity_controller():
             command = MAXIMUM_OUTPUT
         elif command < -1 * MAXIMUM_OUTPUT:
             command = -1 * MAXIMUM_OUTPUT
-
-        # shift to ensure it is positive number
-        command = command + MAXIMUM_OUTPUT
 
         return command
 
