@@ -28,7 +28,7 @@ def send_data(command_L, command_R):
     command_L = command_L + OFFSET
     command_R = command_R + OFFSET
 
-    print(command_L, command_R)
+    # print(command_L, command_R)
     # divide command by single byte
     command_L_high, command_L_low = divide_command(command_L)
     command_R_high, command_R_low = divide_command(command_R)
@@ -69,8 +69,8 @@ def receive_data():
 
     else:
         # get and publish encoder info for wheel odometry
-        print(received_data)
-        print('')
+        # print(received_data)
+        # print('')
         encoders_data.left_encoder = received_data[0]
         encoders_data.right_encoder = received_data[1]
         pub_encoders.publish(encoders_data)
@@ -151,7 +151,7 @@ if __name__ == '__main__':
                      callback_update_command)
 
     # wait until arduino gets ready
-    time.sleep(5)
+    time.sleep(3)
     print("started!")
 
     # signal handler for KeyboardInterrupt

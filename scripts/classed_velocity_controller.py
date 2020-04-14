@@ -10,10 +10,13 @@ from std_msgs.msg import Int16MultiArray
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
+cont = True
 
-# velocity control
+
+# class for this node
 class Velocity_controller():
     def __init__(self):
+        global cont
         # initialize node
         rospy.init_node('velocity_controller', disable_signals=True)
 
@@ -32,15 +35,26 @@ class Velocity_controller():
         self.sub_cmd_vel = rospy.Subscriber('cmd_vel', Twist,
                                             self.callback_update_command, queue_size=1)
 
+        # parameters on velocity command
+        self.cmd_linear = 0.0
+        self.cmd_angular = 0.0
+        # parameters on rover velocity
         self.linear_vel = 0.0
         self.past_linear_vel = 0.0
         self.err_linear_vel = 0.0
         self.angular_vel = 0.0
         self.past_angular_vel = 0.0
         self.err_angular_vel = 0.0
-        self.ODOM_RATE = 100.0
+        # refresh rate of this node
+        self.RATE = 100.0
 
-        rospy.spin()
+        rate = rospy.Rate(self.RATE)
+        while cont:
+            try:
+                self.velocity_control(self.cmd_linear, self.cmd_angular)
+            except KeyboardInterrupt:
+                cont = False
+        rate.sleep()
 
     def callback_update_odometry(self, odometry):
         # store
@@ -51,28 +65,28 @@ class Velocity_controller():
         self.angular_vel = odometry.twist.twist.angular.z
 
     def callback_update_command(self, twist):
-        cmd_linear = twist.linear.x
-        cmd_angular = twist.angular.z
-        self.velocity_control(cmd_linear, cmd_angular)
+        self.cmd_linear = twist.linear.x
+        self.cmd_angular = twist.angular.z
+        # print(self.cmd_linear, self.cmd_angular)
+        # self.velocity_control(cmd_linear, cmd_angular)
 
     def velocity_control(self, cmd_linear, cmd_angular):
+        # print(cmd_linear, cmd_angular)
         # local parameters
-        # Pgain_LINEAR = 90.0
-        # Dgain_LINEAR = 0.1
-        # Igain_LINEAR = 3.0
         Pgain_LINEAR = 30.0
-        Dgain_LINEAR = 0.3
-        Igain_LINEAR = 3.0
+        Dgain_LINEAR = 0.0001
+        Igain_LINEAR = 0.02
         Pgain_ANGULAR = 1.0
         Dgain_ANGULAR = 0.0
         Igain_ANGULAR = 0.0
         command_offset = 0.0  # command offset for robot rotation
         motor_command_L = 0  # command for left motor
         motor_command_R = 0  # command for right motor
-        dt = 1.0 / self.ODOM_RATE  # cycle length (seconds)
+        dt = 1.0 / self.RATE  # cycle length (seconds)
+        # accumulated error for integral control
         self.err_linear_vel = self.err_linear_vel + \
             (cmd_linear - self.linear_vel)
-        self.err_angular_vel = self.err_angular_vel + \
+        self.err_angular_vel = self.angular_vel + \
             (cmd_angular - self.angular_vel)
 
         # PD control for linear velocity (didn't introduce I control to keep the code simple)
@@ -117,6 +131,10 @@ class Velocity_controller():
             command = -1 * MAXIMUM_OUTPUT
 
         return command
+
+    def handler(signal, frame):
+        global cont
+        cont = False
 
 
 if __name__ == '__main__':
