@@ -34,7 +34,7 @@ volatile byte pulse_L, last_pulse_L, pulse_R, last_pulse_R;
 volatile long encoder_count_L = 0, encoder_count_R = 0;
 
 // prepare parameters for motor output before receiving commands
-int pwm_L = 0, pwm_R = 0;
+int command_L = 0, command_R = 0;
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -51,7 +51,7 @@ void setup() {
         Timer1.attachInterrupt(interrupt);
 
         // serial communication initialization
-        Serial.begin(230400);
+        Serial.begin(115200);
 
 
         /* Initialise the bno055_imu */
@@ -96,9 +96,9 @@ void setup() {
 void loop() {
 
         //parameters to store quaternions(w,x,y,z)
-        float quaternions[4];
+        float quaternions[4] = {0, 0, 0, 0};
         if (timer_interrupt_flag == true) { // get imu data at timer interruption
-                get_quaternion_data(quaternions);
+                // get_quaternion_data(quaternions);
                 timer_interrupt_flag = false; // toggle the flag again
         }
 
@@ -110,22 +110,21 @@ void loop() {
 
 
         // communicate with host PC
-        if (Serial.available() > 2) {
+        if (Serial.available() > 4) {
                 if (Serial.read() == 'H') {//only when received data starts from 'H'
-                        // read data : pwm command for motors
-                        pwm_L = receive_data();
-                        pwm_R = receive_data();
-
-                        pwm_L = shift_pwm();
-                        pwm_R = shift_pwm():
-
+                        // read data : pwm command for motors and shift it
+                        int offset = 300; // the value depends how much did you offset befor sending the commands
+                        command_L = receive_data() - offset;
+                        command_R = receive_data() - offset;
 
                         // drive motors
                         if(battery2_voltage < 13.5) { //disable motors when battery voltage is not enough
-                                pwm_L = 0;
-                                pwm_R = 0;
+                                // motor_drive(0, 0);
+                                motor_drive(0, 0);
                         }
-                        motor_drive(pwm_L, pwm_R);
+                        else{
+                                motor_drive(command_L, command_R);
+                        }
 
 
                         // send data : data of encoders and IMU
@@ -139,19 +138,12 @@ void loop() {
                         // if com speed is fast enough
                         Serial.println(battery1_voltage);
                         Serial.println(battery2_voltage);
-                        // Serial.println(pwm_L);
-                        // Serial.println(pwm_R);
+
+                        // to check the commands sent to motor driver
+                        // Serial.println(command_L);
+                        // Serial.println(command_R);
                 }
         }
-
-        // drive motors based on command
-        // if (battery2_voltage > 13.5) {// when the battery is enough
-        //         motor_drive(pwm_L, pwm_R); //2 motors are mounted opposite direction
-        // }
-        // else { // if not
-        //         motor_drive(0, 0);
-        // }
-
         // voltage alert by LEDs
         voltage_alert(battery1_voltage, battery2_voltage);
 }

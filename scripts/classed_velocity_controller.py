@@ -57,9 +57,12 @@ class Velocity_controller():
 
     def velocity_control(self, cmd_linear, cmd_angular):
         # local parameters
-        Pgain_LINEAR = 40.0
-        Dgain_LINEAR = 0.027
-        Igain_LINEAR = 0.0
+        # Pgain_LINEAR = 90.0
+        # Dgain_LINEAR = 0.1
+        # Igain_LINEAR = 3.0
+        Pgain_LINEAR = 30.0
+        Dgain_LINEAR = 0.3
+        Igain_LINEAR = 3.0
         Pgain_ANGULAR = 1.0
         Dgain_ANGULAR = 0.0
         Igain_ANGULAR = 0.0

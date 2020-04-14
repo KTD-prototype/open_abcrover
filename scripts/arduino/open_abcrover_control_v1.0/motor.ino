@@ -1,29 +1,53 @@
-void motor_drive(int left_pwm, int right_pwm) {
-  // regulate pwm and remap from 0-255 to 0-400(due to config of the motor drive library)
-  left_pwm = regulate_output(left_pwm * 80 / 51);
-  right_pwm = regulate_output(right_pwm * 80 / 51);
+// parameter to store latest commnad to the motor driver
+int last_left_command = 0, last_right_command = 0;
 
-  md.setM2Speed(left_pwm);
-  md.setM1Speed(right_pwm);
-  pwm_L = left_pwm;
-  pwm_R = right_pwm;
+void motor_drive(int left_command, int right_command) {
+  // ramp command to motor driver to avoid sudden current
+  left_command = ramp_command(left_command, last_left_command);
+  right_command = ramp_command(right_command, last_right_command);
+
+  // regulate output for motor driver.
+  left_command = regulate_command(left_command);
+  right_command = regulate_command(right_command);
+
+  md.setM2Speed(left_command);
+  md.setM1Speed(right_command);
+
+  // store latest command
+  last_left_command = left_command;
+  last_right_command = right_command;
+
+  // for test
+  command_L = left_command;
+  command_R = right_command;
 }
 
 
-int regulate_output(int pwm_value) {
-  if (pwm_value > MAXIMUM_OUTPUT) {
-    pwm_value = MAXIMUM_OUTPUT;
+// Maximum change of command to motor driver to avoid steep change of command
+int MAXIMUM_OUTPUT_CHANGE = 5;
+int ramp_command(int current_command, int last_command){
+  int ramped_command = 0;
+
+  if(current_command - last_command > MAXIMUM_OUTPUT_CHANGE){
+    ramped_command = last_command + MAXIMUM_OUTPUT_CHANGE;
   }
-  else if (pwm_value < -1 * MAXIMUM_OUTPUT) {
-    pwm_value = -1 * MAXIMUM_OUTPUT;
+  else if(current_command - last_command < -1 * MAXIMUM_OUTPUT_CHANGE){
+    ramped_command = last_command - MAXIMUM_OUTPUT_CHANGE;
   }
-  return pwm_value;
+  else{
+    ramped_command = current_command;
+  }
+
+  return ramped_command;
 }
 
 
-
-// shift pwm command range: from 0 - 254 to -254 - 254
-int shift_pwm(int pwm_data){
-        pwm_data = (pwm_data - 127) * 2;
-        return pwm_data;
+int regulate_command(int command) {
+  if (command > MAXIMUM_OUTPUT) {
+    command = MAXIMUM_OUTPUT;
+  }
+  else if (command < -1 * MAXIMUM_OUTPUT) {
+    command = -1 * MAXIMUM_OUTPUT;
+  }
+  return command;
 }
