@@ -18,17 +18,17 @@ G_NUM_OF_RECEIVE_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
 
 
 serial = serial.Serial('/dev/MEGA#1', 115200)
+serial.reset_input_buffer()
 
 
 # function to send command to arduino
 def send_data(command_L, command_R):
-    # print('send start')
     # shift command to ensure they are positive number
+    # print(command_L, command_R)
     OFFSET = 300  # big enough than MAXIMUM_OUTPUT:300, but ensure don't exceed 32767
     command_L = command_L + OFFSET
     command_R = command_R + OFFSET
 
-    # print(command_L, command_R)
     # divide command by single byte
     command_L_high, command_L_low = divide_command(command_L)
     command_R_high, command_R_low = divide_command(command_R)
@@ -36,10 +36,10 @@ def send_data(command_L, command_R):
     # generate a command as a series of characters
     command = ['H', chr(command_L_high), chr(command_L_low),
                chr(command_R_high), chr(command_R_low)]
+    # command = ['H', chr(command_L), chr(command_R)]
     # print(command)
-    serial.reset_input_buffer()
+    serial.reset_input_buffer()  # flush buffer
     serial.write(command)  # send
-    # print('send end')
 
 
 def divide_command(command):
@@ -49,7 +49,6 @@ def divide_command(command):
 
 
 def receive_data():
-    # print('receive start')
     global G_NUM_OF_RECEIVE_DATA
     received_data = [0.0] * G_NUM_OF_RECEIVE_DATA
     reset_flag = False
@@ -57,6 +56,7 @@ def receive_data():
     for i in range(G_NUM_OF_RECEIVE_DATA):  # read 8 data line by line
         received_data[i] = serial.readline()
         received_data[i] = received_data[i].replace('\r\n', '')
+        # print(i)
 
         # TODO:procedure when arduino is reset >> turn reset_flag to True
         if received_data[i] == '*************':
@@ -71,6 +71,7 @@ def receive_data():
         # get and publish encoder info for wheel odometry
         # print(received_data)
         # print('')
+        # print('')
         encoders_data.left_encoder = received_data[0]
         encoders_data.right_encoder = received_data[1]
         pub_encoders.publish(encoders_data)
@@ -81,11 +82,11 @@ def receive_data():
         imu_data.orientation.z = received_data[4]
         imu_data.orientation.w = received_data[5]
         imu_pub.publish(imu_data)
-
+        #
         # check_battery_voltage(received_data[6], 1)
         # check_battery_voltage(received_data[7], 2)
 
-        # print('receive end')
+    serial.reset_input_buffer()  # flush buffer
 
 
 def check_battery_voltage(voltage, num):
@@ -115,13 +116,17 @@ def arduino_interface_main():
     rate = rospy.Rate(100)
     while cont:
         try:
+            # print('send start')
             send_data(g_pwm_L, g_pwm_R)
-            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA * 3:
+            # print('send end')
+
+            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA * 4:
                 # todo : at first I thought that waiting data should be more than 4bytes/data
                 #        but it doesn't work
-                # print('wait')
                 pass
+            # print('receive start')
             receive_data()
+            # print('receive end')
 
         except KeyboardInterrupt:
             cont = False

@@ -45,10 +45,10 @@ class Velocity_controller():
         self.angular_vel = 0.0
         self.past_angular_vel = 0.0
         self.err_angular_vel = 0.0
-        # refresh rate of this node
-        self.RATE = 100.0
+        # refresh rate of odometry
+        self.ODOM_RATE = 100.0
 
-        rate = rospy.Rate(self.RATE)
+        rate = rospy.Rate(100)
         while cont:
             try:
                 self.velocity_control(self.cmd_linear, self.cmd_angular)
@@ -73,34 +73,56 @@ class Velocity_controller():
     def velocity_control(self, cmd_linear, cmd_angular):
         # print(cmd_linear, cmd_angular)
         # local parameters
-        Pgain_LINEAR = 30.0
-        Dgain_LINEAR = 0.0001
-        Igain_LINEAR = 0.02
-        Pgain_ANGULAR = 1.0
-        Dgain_ANGULAR = 0.0
-        Igain_ANGULAR = 0.0
+        # Pgain_LINEAR = 30.0
+        # Dgain_LINEAR = 0.0002
+        # Igain_LINEAR = 0.02
+        # Pgain_ANGULAR = 7.0
+        # Dgain_ANGULAR = 0.01
+        # Igain_ANGULAR = 0.004
+        Pgain_LINEAR = 60.0
+        Igain_LINEAR = 0.01
+        Dgain_LINEAR = 0.075
+        Pgain_ANGULAR = 15.0
+        Igain_ANGULAR = 0.001
+        Dgain_ANGULAR = 0.03
         command_offset = 0.0  # command offset for robot rotation
         motor_command_L = 0  # command for left motor
         motor_command_R = 0  # command for right motor
-        dt = 1.0 / self.RATE  # cycle length (seconds)
+        # cycle length (seconds) to get acceleration of the rover
+        dt = 1.0 / self.ODOM_RATE
         # accumulated error for integral control
-        self.err_linear_vel = self.err_linear_vel + \
-            (cmd_linear - self.linear_vel)
-        self.err_angular_vel = self.angular_vel + \
-            (cmd_angular - self.angular_vel)
+        self.err_linear_vel += cmd_linear - self.linear_vel
+        self.err_angular_vel += cmd_angular - self.angular_vel
 
-        # PD control for linear velocity (didn't introduce I control to keep the code simple)
+        # PD control for linear velocity
+        # if cmd_linear == 0:
+        #     motor_command_L = 0
+        #     self.err_linear_vel = 0
+        # else:
         motor_command_L = Pgain_LINEAR * (cmd_linear - self.linear_vel) - \
             Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / \
             dt + Igain_LINEAR * self.err_linear_vel
         motor_command_R = -1 * motor_command_L
 
+        # if cmd_linear < 0:
+        #     cmd_angular = -1 * cmd_angular
+        #     self.err_angular_vel = 0
         # PD control for angular velocity
+        # if cmd_angular == 0:
+        #     command_offset = 0
+        #     self.err_angular_vel = 0
+        # else:
         command_offset = Pgain_ANGULAR * \
             (cmd_angular - self.angular_vel) - Dgain_ANGULAR * \
-            (self.angular_vel - self.past_angular_vel) + \
+            (self.angular_vel - self.past_angular_vel) / dt + \
             Igain_ANGULAR * self.err_angular_vel
 
+        print(Pgain_LINEAR * (cmd_linear - self.linear_vel),
+              Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / dt,
+              Igain_LINEAR * self.err_linear_vel)
+        # print(Pgain_ANGULAR * (cmd_angular - self.angular_vel),
+        #       Dgain_ANGULAR * (self.angular_vel - self.past_angular_vel) / dt,
+        #       Igain_ANGULAR * self.err_angular_vel)
         motor_command_L = motor_command_L - command_offset
         motor_command_R = motor_command_R - command_offset
 

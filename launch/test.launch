@@ -22,7 +22,7 @@
     <param name="scale_linear" value="0.28"/>
     <param name="scale_linear_turbo" value="1.11"/>
     <param name="axis_angular" value="0"/>
-    <param name="scale_angular" value="1"/>
+    <param name="scale_angular" value="3.5"/> 
   </node>
 
   <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map frame 100"/>

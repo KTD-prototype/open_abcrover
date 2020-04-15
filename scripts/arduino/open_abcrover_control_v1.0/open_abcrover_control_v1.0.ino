@@ -25,6 +25,7 @@
 
 // flag to control whether timer interruption is ignited or not
 volatile bool timer_interrupt_flag = false;
+volatile bool imu_refresh_enable = true;
 
 //paramters to count time
 int time1, time2, time3, past_time;
@@ -35,6 +36,8 @@ volatile long encoder_count_L = 0, encoder_count_R = 0;
 
 // prepare parameters for motor output before receiving commands
 int command_L = 0, command_R = 0;
+//parameters to store quaternions(w,x,y,z)
+float quaternions[4] = {0, 0, 0, 0};
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -86,6 +89,8 @@ void setup() {
         pinMode(ENC_RA, INPUT_PULLUP);
         pinMode(ENC_RB, INPUT_PULLUP);
 
+        // pinMode(LED_BUILTIN, OUTPUT);
+
         // setup hardware interrupt
         attachInterrupt(0, encoder_read, CHANGE); // pin2 to left encoder phase A
         attachInterrupt(1, encoder_read, CHANGE); // pin3 to left encoder phase B
@@ -94,14 +99,10 @@ void setup() {
 }
 
 void loop() {
-
-        //parameters to store quaternions(w,x,y,z)
-        float quaternions[4] = {0, 0, 0, 0};
         if (timer_interrupt_flag == true) { // get imu data at timer interruption
-                // get_quaternion_data(quaternions);
+                get_quaternion_data(quaternions);
                 timer_interrupt_flag = false; // toggle the flag again
         }
-
 
         // check the battery voltage (divided by 4, from 14.8V to 3.7V at nominal voltage)
         float battery1_voltage = analogRead(volt_input1) * 4.0 * 5.0 / 1023.0;
@@ -110,22 +111,25 @@ void loop() {
 
 
         // communicate with host PC
-        if (Serial.available() > 4) {
+        if (Serial.available() > 2) {
+                // delayMicroseconds(500);
                 if (Serial.read() == 'H') {//only when received data starts from 'H'
+                        // delay(1);
                         // read data : pwm command for motors and shift it
                         int offset = 300; // the value depends how much did you offset befor sending the commands
                         command_L = receive_data() - offset;
                         command_R = receive_data() - offset;
+                        // command_L = (Serial.read() - offset) * 2;
+                        // command_R = (Serial.read() - offset) * 2;
 
                         // drive motors
-                        if(battery2_voltage < 13.5) { //disable motors when battery voltage is not enough
+                        if(battery2_voltage < 13.5) {//disable motors when battery voltage is not enough
                                 // motor_drive(0, 0);
-                                motor_drive(0, 0);
+                                motor_drive(command_L, command_R);
                         }
                         else{
                                 motor_drive(command_L, command_R);
                         }
-
 
                         // send data : data of encoders and IMU
                         Serial.println(encoder_count_L);
@@ -134,16 +138,26 @@ void loop() {
                         Serial.println(quaternions[1]);
                         Serial.println(quaternions[2]);
                         Serial.println(quaternions[3]);
+                        // Serial.println(Serial.available());
 
                         // if com speed is fast enough
-                        Serial.println(battery1_voltage);
-                        Serial.println(battery2_voltage);
+                        // Serial.println(battery1_voltage);
+                        // Serial.println(battery2_voltage);
 
                         // to check the commands sent to motor driver
-                        // Serial.println(command_L);
-                        // Serial.println(command_R);
+                        Serial.println(command_L);
+                        Serial.println(command_R);
+
+                        //flush buffer and wait to complete sending
+                        // Serial.flush();
+                        // while(Serial.available()) {
+                        //         Serial.read();
+                        // }
                 }
         }
+
+
+
         // voltage alert by LEDs
         voltage_alert(battery1_voltage, battery2_voltage);
 }
