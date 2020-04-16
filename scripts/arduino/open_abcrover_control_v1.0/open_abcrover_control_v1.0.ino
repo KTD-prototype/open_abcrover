@@ -35,6 +35,7 @@ volatile byte pulse_L, last_pulse_L, pulse_R, last_pulse_R;
 volatile long encoder_count_L = 0, encoder_count_R = 0;
 
 // prepare parameters for motor output before receiving commands
+int operation_mode = 0; // 0:disabiled, 1:teleop, 2:teleop_turbo, 3:autonomous
 int command_L = 0, command_R = 0;
 //parameters to store quaternions(w,x,y,z)
 float quaternions[4] = {0, 0, 0, 0};
@@ -111,10 +112,11 @@ void loop() {
 
 
         // communicate with host PC
-        if (Serial.available() > 2) {
+        if (Serial.available() > 3) {
                 // delayMicroseconds(500);
                 if (Serial.read() == 'H') {//only when received data starts from 'H'
-                        // delay(1);
+                        // read data : operation mode
+                        operation_mode = Serial.read();
                         // read data : pwm command for motors and shift it
                         int offset = 300; // the value depends how much did you offset befor sending the commands
                         command_L = receive_data() - offset;
@@ -123,9 +125,12 @@ void loop() {
                         // command_R = (Serial.read() - offset) * 2;
 
                         // drive motors
-                        if(battery2_voltage < 13.5) {//disable motors when battery voltage is not enough
+                        if(operation_mode == 0) {// if the command is disabled
+                                motor_drive(0, 0);
+                        }
+                        else if(battery2_voltage < 13.5) {//if the battery is running out
                                 // motor_drive(0, 0);
-                                motor_drive(command_L, command_R);
+                                motor_drive(0, 0);
                         }
                         else{
                                 motor_drive(command_L, command_R);

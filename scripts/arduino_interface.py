@@ -8,12 +8,14 @@ import serial
 import time
 import signal
 from std_msgs.msg import Int16MultiArray
+from std_msgs.msg import Int8
 from sensor_msgs.msg import Imu
 from wheel_odometry.msg import Encoder_2wheel
 
 cont = True
 g_pwm_L = 0
 g_pwm_R = 0
+g_operation_mode = 0  # 0:disabled, 1:teleop, 2:teleop_turbo, 3:autonomous
 G_NUM_OF_RECEIVE_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
 
 
@@ -34,8 +36,8 @@ def send_data(command_L, command_R):
     command_R_high, command_R_low = divide_command(command_R)
 
     # generate a command as a series of characters
-    command = ['H', chr(command_L_high), chr(command_L_low),
-               chr(command_R_high), chr(command_R_low)]
+    command = ['H', chr(g_operation_mode), chr(command_L_high), chr(
+        command_L_low), chr(command_R_high), chr(command_R_low)]
     # command = ['H', chr(command_L), chr(command_R)]
     # print(command)
     serial.reset_input_buffer()  # flush buffer
@@ -105,6 +107,11 @@ def callback_update_command(command):
     g_pwm_R = command.data[1]
 
 
+def callback_update_operationmode(mode):
+    global g_operation_mode
+    g_operation_mode = mode.data
+
+
 def handler(signal, frame):
     global cont
     cont = False
@@ -154,6 +161,9 @@ if __name__ == '__main__':
     # subscriber for pwm data
     rospy.Subscriber('motor_commands', Int16MultiArray,
                      callback_update_command)
+    # subscriber for pwm data
+    rospy.Subscriber('operation_mode', Int8,
+                     callback_update_operationmode)
 
     # wait until arduino gets ready
     time.sleep(3)

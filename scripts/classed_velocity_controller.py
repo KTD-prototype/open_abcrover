@@ -7,13 +7,16 @@ import rospy
 import signal
 import time
 from std_msgs.msg import Int16MultiArray
+from std_msgs.msg import Int8
+from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
 cont = True
 
-
 # class for this node
+
+
 class Velocity_controller():
     def __init__(self):
         global cont
@@ -27,13 +30,18 @@ class Velocity_controller():
         self.motor_command.data.extend([0, 0])  # for motor commnad left/right
         # self.motor_command.data.append(0)  # for right motor command
 
+        # publisher for operation mode
+        self.pub_operation_mode = rospy.Publisher(
+            'operation_mode', Int8, queue_size=1, latch=True)
         # subscriber for wheel odometry
         self.sub_odom = rospy.Subscriber('wheel_odometry_2wheel', Odometry,
                                          self.callback_update_odometry, queue_size=1)
-
         # subscriber for velocity command
         self.sub_cmd_vel = rospy.Subscriber('cmd_vel', Twist,
                                             self.callback_update_command, queue_size=1)
+        # subscriber for velocity command
+        self.sub_cmd_vel = rospy.Subscriber('joy', Joy,
+                                            self.callback_update_operationmode, queue_size=1)
 
         # parameters on velocity command
         self.cmd_linear = 0.0
@@ -47,6 +55,8 @@ class Velocity_controller():
         self.err_angular_vel = 0.0
         # refresh rate of odometry
         self.ODOM_RATE = 100.0
+        # parameters for operation mode
+        self.operation_mode = 0  # 0:teleop, 1:teleop_turbo, 2:autonomous
 
         rate = rospy.Rate(100)
         while cont:
@@ -69,6 +79,24 @@ class Velocity_controller():
         self.cmd_angular = twist.angular.z
         # print(self.cmd_linear, self.cmd_angular)
         # self.velocity_control(cmd_linear, cmd_angular)
+
+    def callback_update_operationmode(self, joy):
+        # store current mode
+        current_mode = self.operation_mode
+
+        # chack joy command
+        if joy.buttons[4] == 1:
+            self.operation_mode = 1  # teleop
+        elif joy.buttons[0] == 1:
+            self.operation_mode = 2  # teleop with turbo
+        elif joy.buttons[3] == 1 and joy.buttons[5] == 1:
+            self.operation_mode = 3  # autonomous
+        else:
+            self.operation_mode = 0  # disabled
+
+        # if mode has been changed
+        if self.operation_mode != current_mode:
+            self.pub_operation_mode.publish(self.operation_mode)
 
     def velocity_control(self, cmd_linear, cmd_angular):
         # print(cmd_linear, cmd_angular)
