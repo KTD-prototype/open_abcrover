@@ -55,7 +55,7 @@ void setup() {
         Timer1.attachInterrupt(interrupt);
 
         // serial communication initialization
-        Serial.begin(115200);
+        Serial.begin(230400);
 
 
         /* Initialise the bno055_imu */
@@ -112,8 +112,9 @@ void loop() {
 
 
         // communicate with host PC
-        if (Serial.available() > 2) { //6 bytes should be received, but arduino hangs up when you wait all 6 bytes are available
+        if (Serial.available() > 1) { //6 bytes should be received, but arduino hangs up when you wait all 6 bytes are available
                 if (Serial.read() == 'H') {//only when received data starts from 'H'
+                        delayMicroseconds(200);
                         // read data : operation mode
                         operation_mode = Serial.read();
                         // read data : pwm command for motors and shift it
@@ -125,15 +126,17 @@ void loop() {
 
                         // drive motors
                         if(operation_mode == 0) {// if the command is disabled
-                                motor_drive(0, 0);
+                                // motor_drive(0, 0);
+                                command_L = 0;
+                                command_R = 0;
                         }
                         else if(battery2_voltage < 13.5) {//if the battery is running out
                                 // motor_drive(0, 0);
-                                motor_drive(0, 0);
+                                command_L = 0;
+                                command_R = 0;
                         }
-                        else{
-                                motor_drive(command_L, command_R);
-                        }
+                        motor_drive(command_L, command_R);
+
 
                         // send data : data of encoders and IMU
                         Serial.println(encoder_count_L);
