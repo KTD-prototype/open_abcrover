@@ -19,7 +19,7 @@ g_operation_mode = 0  # 0:disabled, 1:teleop, 2:teleop_turbo, 3:autonomous
 G_NUM_OF_RECEIVE_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
 
 
-serial = serial.Serial('/dev/MEGA#1', 115200)
+serial = serial.Serial('/dev/MEGA#1', 230400)
 serial.reset_input_buffer()
 
 
@@ -71,7 +71,7 @@ def receive_data():
 
     else:
         # get and publish encoder info for wheel odometry
-        # print(received_data)
+        print(received_data)
         # print('')
         # print('')
         encoders_data.left_encoder = received_data[0]

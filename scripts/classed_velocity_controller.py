@@ -145,9 +145,9 @@ class Velocity_controller():
             (self.angular_vel - self.past_angular_vel) / dt + \
             Igain_ANGULAR * self.err_angular_vel
 
-        print(Pgain_LINEAR * (cmd_linear - self.linear_vel),
-              Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / dt,
-              Igain_LINEAR * self.err_linear_vel)
+        # print(Pgain_LINEAR * (cmd_linear - self.linear_vel),
+        #       Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / dt,
+        #       Igain_LINEAR * self.err_linear_vel)
         # print(Pgain_ANGULAR * (cmd_angular - self.angular_vel),
         #       Dgain_ANGULAR * (self.angular_vel - self.past_angular_vel) / dt,
         #       Igain_ANGULAR * self.err_angular_vel)

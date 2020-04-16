@@ -112,8 +112,7 @@ void loop() {
 
 
         // communicate with host PC
-        if (Serial.available() > 3) {
-                // delayMicroseconds(500);
+        if (Serial.available() > 2) { //6 bytes should be received, but arduino hangs up when you wait all 6 bytes are available
                 if (Serial.read() == 'H') {//only when received data starts from 'H'
                         // read data : operation mode
                         operation_mode = Serial.read();
@@ -146,12 +145,12 @@ void loop() {
                         // Serial.println(Serial.available());
 
                         // if com speed is fast enough
-                        // Serial.println(battery1_voltage);
-                        // Serial.println(battery2_voltage);
+                        Serial.println(battery1_voltage);
+                        Serial.println(battery2_voltage);
 
                         // to check the commands sent to motor driver
-                        Serial.println(command_L);
-                        Serial.println(command_R);
+                        // Serial.println(command_L);
+                        // Serial.println(command_R);
 
                         //flush buffer and wait to complete sending
                         // Serial.flush();
