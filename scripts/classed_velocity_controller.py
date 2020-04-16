@@ -79,9 +79,9 @@ class Velocity_controller():
         # Pgain_ANGULAR = 7.0
         # Dgain_ANGULAR = 0.01
         # Igain_ANGULAR = 0.004
-        Pgain_LINEAR = 60.0
-        Igain_LINEAR = 0.01
-        Dgain_LINEAR = 0.075
+        Pgain_LINEAR = 100.0
+        Igain_LINEAR = 0.007
+        Dgain_LINEAR = 0.25
         Pgain_ANGULAR = 15.0
         Igain_ANGULAR = 0.001
         Dgain_ANGULAR = 0.03
