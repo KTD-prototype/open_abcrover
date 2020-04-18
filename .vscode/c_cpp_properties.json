@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/opt/arduino-1.8.12/tools/**",
+                "/opt/arduino-1.8.12/hardware/arduino/avr/**"
+            ],
+            "browse": {
+                "path": [
+                    "/opt/arduino-1.8.12/libraries",
+                    "/home/ktd/Arduino/libraries"
+                ]
+            },
+            "forcedInclude": [
+                "/opt/arduino-1.8.12/hardware/arduino/avr/cores/arduino/Arduino.h"
+            ],
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "configurationProvider": "vector-of-bool.cmake-tools"
+        }
+    ],
+    "version": 4
+}
