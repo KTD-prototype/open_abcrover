@@ -85,37 +85,32 @@ class Velocity_controller():
         current_mode = self.operation_mode
 
         # chack joy command
+        self.operation_mode = 0  # disabled
+
+        if joy.buttons[3] == 1 and joy.buttons[5] == 1:
+            self.operation_mode = 3  # autonomous
         if joy.buttons[4] == 1:
             self.operation_mode = 1  # teleop
-        elif joy.buttons[0] == 1:
+        if joy.buttons[0] == 1:
             self.operation_mode = 2  # teleop with turbo
-        elif joy.buttons[3] == 1 and joy.buttons[5] == 1:
-            self.operation_mode = 3  # autonomous
-        else:
-            self.operation_mode = 0  # disabled
 
         # if mode has been changed
         if self.operation_mode != current_mode:
             self.pub_operation_mode.publish(self.operation_mode)
 
     def velocity_control(self, cmd_linear, cmd_angular):
-        # print(cmd_linear, cmd_angular)
-        # local parameters
-        # Pgain_LINEAR = 30.0
-        # Dgain_LINEAR = 0.0002
-        # Igain_LINEAR = 0.02
-        # Pgain_ANGULAR = 7.0
-        # Dgain_ANGULAR = 0.01
-        # Igain_ANGULAR = 0.004
+        # parameters for gains
         Pgain_LINEAR = 100.0
         Igain_LINEAR = 0.007
         Dgain_LINEAR = 0.25
         Pgain_ANGULAR = 15.0
         Igain_ANGULAR = 0.001
         Dgain_ANGULAR = 0.03
+
+        # parameters for motor commands
         command_offset = 0.0  # command offset for robot rotation
-        motor_command_L = 0  # command for left motor
-        motor_command_R = 0  # command for right motor
+        motor_command_L = 0  # for left motor
+        motor_command_R = 0  # for right motor
         # cycle length (seconds) to get acceleration of the rover
         dt = 1.0 / self.ODOM_RATE
         # accumulated error for integral control

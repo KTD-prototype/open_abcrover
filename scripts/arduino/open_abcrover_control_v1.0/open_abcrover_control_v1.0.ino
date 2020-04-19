@@ -4,20 +4,21 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include "DualVNH5019MotorShield.h"
+#include <Adafruit_NeoPixel.h>
 
 // constants for an IMU
 #define GRAVITATIONAL_ACCEL 9.798 //at TOKYO
 #define IMU_SAMPLERATE_HZ 100     //refresh rate of the imu (looks like it should be fixed at 100Hz due to bno055 hardware...?)
 
 // constants for pin assign
-#define ENC_LA 2       // input from encoder, left motor, phaseA
-#define ENC_LB 3       // left motor phaseB
-#define ENC_RA 18      // right motor, phaseA
-#define ENC_RB 19      // right motor, phaseB
-#define volt_input1 A2 // voltage monitor
-#define volt_input2 A3 // voltage monitor
-#define alert_led1 22  // battery1 voltage alert
-#define alert_led2 24  // battery2 voltage alert
+#define ENC_LA 2            // input from encoder, left motor, phaseA
+#define ENC_LB 3            // left motor phaseB
+#define ENC_RA 18           // right motor, phaseA
+#define ENC_RB 19           // right motor, phaseB
+#define VOLTAGE_MONITOR1 A2 // voltage monitor
+#define VOLTAGE_MONITOR2 A3 // voltage monitor
+#define ALERT_LED 52        // a pin the series of full-color LEDs are connected
+#define NUMPIXELS 2         // the number of full-color LEDs
 
 // constants for motors
 #define PULSE_PER_ROUND 723.24 // encoder pulse resolution * gear ratio
@@ -39,9 +40,9 @@ int operation_mode = 0; // 0:disabiled, 1:teleop, 2:teleop_turbo, 3:autonomous
 int command_L = 0, command_R = 0;
 
 //parameters to store IMU data
-float quaternions[4] = {0, 0, 0, 0}; //x,y,z,w
-float accelerometers[3] = {0, 0, 0}; //x,y,z
-float gyros[3] = {0, 0, 0};          //roll,pitch,yaw
+float quaternions[4] = {0.0, 0.0, 0.0, 0.0}; //x,y,z,w
+float accelerometers[3] = {0.0, 0.0, 0.0};   //x,y,z
+float gyros[3] = {0.0, 0.0, 0.0};            //roll,pitch,yaw
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -50,6 +51,9 @@ Adafruit_BNO055 bno = Adafruit_BNO055(-1, 0x28);
 // pin remap of the motor sheild
 //                       1a,1b,1pw,1e,1cs,2a,2b,2pw,2e,2cs
 DualVNH5019MotorShield md(13, 4, 9, 6, A0, 7, 8, 10, 12, A1);
+
+// initialize full color LED
+Adafruit_NeoPixel pixels(NUMPIXELS, ALERT_LED, NEO_GRB + NEO_KHZ800);
 
 void setup()
 {
@@ -85,6 +89,8 @@ void setup()
         // TCCR2B = (TCCR2B & 0b11111000) | 0x06; //122.55 [Hz]
         // TCCR2B = (TCCR2B & 0b11111000) | 0x07; //30.64 [Hz]
 
+        pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+
         // setup arduino GPIO
         pinMode(ENC_LA, INPUT_PULLUP);
         pinMode(ENC_LB, INPUT_PULLUP);
@@ -111,9 +117,9 @@ void loop()
         }
 
         // check the battery voltage (divided by 4, from 14.8V to 3.7V at nominal voltage)
-        float battery1_voltage = analogRead(volt_input1) * 4.0 * 5.0 / 1023.0;
-        float battery2_voltage = -0.664 + float(analogRead(volt_input2)) * 4.0 * 5.0 / 1023.0;
-        // float battery2_voltage = analogRead(volt_input2);
+        float battery_voltage[2] = {0.0, 0.0};
+        battery_voltage[0] = analogRead(VOLTAGE_MONITOR1) * 4.0 * 5.0 / 1023.0;
+        battery_voltage[1] = -0.664 + float(analogRead(VOLTAGE_MONITOR2)) * 4.0 * 5.0 / 1023.0;
 
         // communicate with host PC
         if (Serial.available() > 1)
@@ -123,12 +129,11 @@ void loop()
                         delayMicroseconds(200);
                         // read data : operation mode
                         operation_mode = Serial.read();
+
                         // read data : pwm command for motors and shift it
                         int offset = 300; // the value depends how much did you offset befor sending the commands
                         command_L = receive_data() - offset;
                         command_R = receive_data() - offset;
-                        // command_L = (Serial.read() - offset) * 2;
-                        // command_R = (Serial.read() - offset) * 2;
 
                         // drive motors
                         if (operation_mode == 0)
@@ -137,7 +142,7 @@ void loop()
                                 command_L = 0;
                                 command_R = 0;
                         }
-                        else if (battery2_voltage < 13.5)
+                        else if (battery_voltage[1] < 13.5)
                         { //if the battery is running out
                                 // motor_drive(0, 0);
                                 command_L = 0;
@@ -161,8 +166,8 @@ void loop()
                         // Serial.println(Serial.available());
 
                         // if com speed is fast enough
-                        Serial.println(battery1_voltage);
-                        Serial.println(battery2_voltage);
+                        Serial.println(battery_voltage[0]);
+                        Serial.println(battery_voltage[1]);
 
                         // to check the commands sent to motor driver
                         // Serial.println(command_L);
@@ -176,8 +181,8 @@ void loop()
                 }
         }
 
-        // voltage alert by LEDs
-        voltage_alert(battery1_voltage, battery2_voltage);
+        // rover state indicator
+        rover_state_indicator(operation_mode, battery_voltage);
 }
 
 // function for timer interrupt : toggle the flag and process will be in the main.
