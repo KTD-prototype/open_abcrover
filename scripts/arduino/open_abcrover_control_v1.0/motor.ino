@@ -24,7 +24,7 @@ void motor_drive(int left_command, int right_command) {
 
 
 // Maximum change of command to motor driver to avoid steep change of command
-int MAXIMUM_OUTPUT_CHANGE = 3;
+int MAXIMUM_OUTPUT_CHANGE = 2;
 int IRREGULER_INPUT_THRESHOLD = 200;
 int ramp_command(int current_command, int last_command){
         int ramped_command = 0;
