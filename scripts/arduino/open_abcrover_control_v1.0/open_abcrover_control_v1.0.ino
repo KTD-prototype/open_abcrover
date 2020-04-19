@@ -119,7 +119,7 @@ void loop()
         // check the battery voltage (divided by 4, from 14.8V to 3.7V at nominal voltage)
         float battery_voltage[2] = {0.0, 0.0};
         battery_voltage[0] = analogRead(VOLTAGE_MONITOR1) * 4.0 * 5.0 / 1023.0;
-        battery_voltage[1] = -1.664 + float(analogRead(VOLTAGE_MONITOR2)) * 4.0 * 5.0 / 1023.0;
+        battery_voltage[1] = -0.664 + float(analogRead(VOLTAGE_MONITOR2)) * 4.0 * 5.0 / 1023.0;
 
         // communicate with host PC
         if (Serial.available() > 1)
