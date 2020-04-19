@@ -7,6 +7,7 @@ import rospy
 import serial
 import time
 import signal
+import tf
 from std_msgs.msg import Int16MultiArray
 from std_msgs.msg import Int8
 from sensor_msgs.msg import Imu
@@ -16,7 +17,7 @@ cont = True
 g_pwm_L = 0
 g_pwm_R = 0
 g_operation_mode = 0  # 0:disabled, 1:teleop, 2:teleop_turbo, 3:autonomous
-G_NUM_OF_RECEIVE_DATA = 8  # 2 encoders, 4 quaternions, 2 battery voltages
+G_NUM_OF_RECEIVE_DATA = 14  # 2 encoders, 4 quaternions, 2 battery voltages
 
 
 serial = serial.Serial('/dev/MEGA#1', 230400)
@@ -58,7 +59,6 @@ def receive_data():
     for i in range(G_NUM_OF_RECEIVE_DATA):  # read 8 data line by line
         received_data[i] = serial.readline()
         received_data[i] = received_data[i].replace('\r\n', '')
-        # print(i)
 
         # TODO:procedure when arduino is reset >> turn reset_flag to True
         if received_data[i] == '*************':
@@ -70,21 +70,33 @@ def receive_data():
         pass  # todo:process when arduino is reset
 
     else:
+        # print(received_data)
+
         # get and publish encoder info for wheel odometry
-        print(received_data)
-        # print('')
-        # print('')
         encoders_data.left_encoder = received_data[0]
         encoders_data.right_encoder = received_data[1]
         pub_encoders.publish(encoders_data)
 
-        # get and publish posture angle information:x,y,z,w
+        # get posture angle information:x,y,z,w
         imu_data.orientation.x = received_data[2]
         imu_data.orientation.y = received_data[3]
         imu_data.orientation.z = received_data[4]
         imu_data.orientation.w = received_data[5]
+        # get accelerometer data : x,y,z
+        imu_data.linear_acceleration.x = received_data[6]
+        imu_data.linear_acceleration.y = received_data[7]
+        imu_data.linear_acceleration.z = received_data[8]
+        # get gyro data ; x, y, z(roll,pitch,yaw)
+        imu_data.angular_velocity.x = received_data[9]
+        imu_data.angular_velocity.y = received_data[10]
+        imu_data.angular_velocity.z = received_data[11]
+        # publish imu data
         imu_pub.publish(imu_data)
-        #
+
+        # euler = tf.transformations.euler_from_quaternion(
+        #     (received_data[2], received_data[3], received_data[4], received_data[5]))
+        # print(euler)
+
         # check_battery_voltage(received_data[6], 1)
         # check_battery_voltage(received_data[7], 2)
 

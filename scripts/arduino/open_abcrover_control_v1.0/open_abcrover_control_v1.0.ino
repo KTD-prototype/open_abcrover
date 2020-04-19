@@ -7,21 +7,21 @@
 
 // constants for an IMU
 #define GRAVITATIONAL_ACCEL 9.798 //at TOKYO
-#define IMU_SAMPLERATE_HZ 100 //refresh rate of the imu (looks like it should be fixed at 100Hz due to bno055 hardware...?)
+#define IMU_SAMPLERATE_HZ 100     //refresh rate of the imu (looks like it should be fixed at 100Hz due to bno055 hardware...?)
 
 // constants for pin assign
-#define ENC_LA 2 // input from encoder, left motor, phaseA
-#define ENC_LB 3 // left motor phaseB
-#define ENC_RA 18 // right motor, phaseA
-#define ENC_RB 19 // right motor, phaseB
+#define ENC_LA 2       // input from encoder, left motor, phaseA
+#define ENC_LB 3       // left motor phaseB
+#define ENC_RA 18      // right motor, phaseA
+#define ENC_RB 19      // right motor, phaseB
 #define volt_input1 A2 // voltage monitor
 #define volt_input2 A3 // voltage monitor
-#define alert_led1 22 // battery1 voltage alert
-#define alert_led2 24 // battery2 voltage alert
+#define alert_led1 22  // battery1 voltage alert
+#define alert_led2 24  // battery2 voltage alert
 
 // constants for motors
 #define PULSE_PER_ROUND 723.24 // encoder pulse resolution * gear ratio
-#define MAXIMUM_OUTPUT 300 // maximum pwm output for motor
+#define MAXIMUM_OUTPUT 300     // maximum pwm output for motor
 
 // flag to control whether timer interruption is ignited or not
 volatile bool timer_interrupt_flag = false;
@@ -37,8 +37,11 @@ volatile long encoder_count_L = 0, encoder_count_R = 0;
 // prepare parameters for motor output before receiving commands
 int operation_mode = 0; // 0:disabiled, 1:teleop, 2:teleop_turbo, 3:autonomous
 int command_L = 0, command_R = 0;
-//parameters to store quaternions(w,x,y,z)
-float quaternions[4] = {0, 0, 0, 0};
+
+//parameters to store IMU data
+float quaternions[4] = {0, 0, 0, 0}; //x,y,z,w
+float accelerometers[3] = {0, 0, 0}; //x,y,z
+float gyros[3] = {0, 0, 0};          //roll,pitch,yaw
 
 // Check I2C device address and correct line below (by default address is 0x29 or 0x28)
 //                                   id, address
@@ -48,8 +51,8 @@ Adafruit_BNO055 bno = Adafruit_BNO055(-1, 0x28);
 //                       1a,1b,1pw,1e,1cs,2a,2b,2pw,2e,2cs
 DualVNH5019MotorShield md(13, 4, 9, 6, A0, 7, 8, 10, 12, A1);
 
-
-void setup() {
+void setup()
+{
         // timer interrupt initialization
         Timer1.initialize(1000000 / IMU_SAMPLERATE_HZ);
         Timer1.attachInterrupt(interrupt);
@@ -57,16 +60,15 @@ void setup() {
         // serial communication initialization
         Serial.begin(230400);
 
-
         /* Initialise the bno055_imu */
         if (!bno.begin())
         { /* There was a problem detecting the BNO055 ... check your connections */
                 Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-                while (1);
+                while (1)
+                        ;
         }
         delay(100);
         bno.setExtCrystalUse(true);
-
 
         // initialize the motor driver shield
         md.init();
@@ -83,7 +85,6 @@ void setup() {
         // TCCR2B = (TCCR2B & 0b11111000) | 0x06; //122.55 [Hz]
         // TCCR2B = (TCCR2B & 0b11111000) | 0x07; //30.64 [Hz]
 
-
         // setup arduino GPIO
         pinMode(ENC_LA, INPUT_PULLUP);
         pinMode(ENC_LB, INPUT_PULLUP);
@@ -99,9 +100,13 @@ void setup() {
         attachInterrupt(4, encoder_read, CHANGE); // pin19 to right encoder phase B
 }
 
-void loop() {
-        if (timer_interrupt_flag == true) { // get imu data at timer interruption
+void loop()
+{
+        if (timer_interrupt_flag == true)
+        { // get imu data at timer interruption
                 get_quaternion_data(quaternions);
+                get_accelerometer_data(accelerometers);
+                get_gyro_data(gyros);
                 timer_interrupt_flag = false; // toggle the flag again
         }
 
@@ -110,10 +115,11 @@ void loop() {
         float battery2_voltage = -0.664 + float(analogRead(volt_input2)) * 4.0 * 5.0 / 1023.0;
         // float battery2_voltage = analogRead(volt_input2);
 
-
         // communicate with host PC
-        if (Serial.available() > 1) { //6 bytes should be received, but arduino hangs up when you wait all 6 bytes are available
-                if (Serial.read() == 'H') {//only when received data starts from 'H'
+        if (Serial.available() > 1)
+        { //6 bytes should be received, but arduino hangs up when you wait all 6 bytes are available
+                if (Serial.read() == 'H')
+                { //only when received data starts from 'H'
                         delayMicroseconds(200);
                         // read data : operation mode
                         operation_mode = Serial.read();
@@ -125,18 +131,19 @@ void loop() {
                         // command_R = (Serial.read() - offset) * 2;
 
                         // drive motors
-                        if(operation_mode == 0) {// if the command is disabled
+                        if (operation_mode == 0)
+                        { // if the command is disabled
                                 // motor_drive(0, 0);
                                 command_L = 0;
                                 command_R = 0;
                         }
-                        else if(battery2_voltage < 13.5) {//if the battery is running out
+                        else if (battery2_voltage < 13.5)
+                        { //if the battery is running out
                                 // motor_drive(0, 0);
                                 command_L = 0;
                                 command_R = 0;
                         }
                         motor_drive(command_L, command_R);
-
 
                         // send data : data of encoders and IMU
                         Serial.println(encoder_count_L);
@@ -145,6 +152,12 @@ void loop() {
                         Serial.println(quaternions[1]);
                         Serial.println(quaternions[2]);
                         Serial.println(quaternions[3]);
+                        Serial.println(accelerometers[0]);
+                        Serial.println(accelerometers[1]);
+                        Serial.println(accelerometers[2]);
+                        Serial.println(gyros[0]);
+                        Serial.println(gyros[1]);
+                        Serial.println(gyros[2]);
                         // Serial.println(Serial.available());
 
                         // if com speed is fast enough
@@ -163,13 +176,12 @@ void loop() {
                 }
         }
 
-
-
         // voltage alert by LEDs
         voltage_alert(battery1_voltage, battery2_voltage);
 }
 
 // function for timer interrupt : toggle the flag and process will be in the main.
-void interrupt() {
+void interrupt()
+{
         timer_interrupt_flag = true;
 }
