@@ -17,7 +17,7 @@ cont = True
 # class for this node
 
 
-class Velocity_controller():
+class Velocity_Controller():
     def __init__(self):
         global cont
         # initialize node
@@ -184,4 +184,4 @@ class Velocity_controller():
 
 if __name__ == '__main__':
     # make class
-    vel_ctrl = Velocity_controller()
+    Velocity_Controller()
