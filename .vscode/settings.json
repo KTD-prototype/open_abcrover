@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "/home/ktd/.pyenv/versions/open_abcrover/bin/python"
+    "python.pythonPath": "/home/ktd/.pyenv/versions/open_abcrover/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }

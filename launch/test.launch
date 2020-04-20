@@ -1,5 +1,5 @@
 <launch>
-  <node name="arduino_interface" pkg="open_abcrover" type="arduino_interface.py" output="screen"/>
+  <node name="arduino_interface" pkg="open_abcrover" type="classed_arduino_interface.py" output="screen"/>
   <node name="velocity_controller" pkg="open_abcrover" type="classed_velocity_controller.py" output="screen"/>
 
   <node name="wheel_odometry" pkg="wheel_odometry" type="wheel_odometry_2wheel.py" output="screen">
@@ -9,20 +9,20 @@
   </node>
 
   <!-- use game pad at mode X -->
-  <node name="joy_node"   pkg="joy" type="joy_node">
+  <node name="joy_node" pkg="joy" type="joy_node">
     <param name="autorepeat_rate" value="100"/>
     <param name="dev" value="/dev/input/js0"/>
   </node>
 
   <!-- use game pad at mode X -->
-  <node name="teleop_twist_joy"   pkg="teleop_twist_joy" type="teleop_node">
+  <node name="teleop_twist_joy" pkg="teleop_twist_joy" type="teleop_node">
     <param name="enable_button" value="4"/>
     <param name="enable_turbo_button" value="0"/>
     <param name="axis_linear" value="1"/>
     <param name="scale_linear" value="0.28"/>
     <param name="scale_linear_turbo" value="1.11"/>
     <param name="axis_angular" value="0"/>
-    <param name="scale_angular" value="3.5"/> 
+    <param name="scale_angular" value="3.5"/>
   </node>
 
   <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map frame 100"/>

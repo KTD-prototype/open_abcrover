@@ -6,131 +6,182 @@
 import rospy
 import signal
 import time
-from std_msgs.msg import Int8MultiArray
+from std_msgs.msg import Int16MultiArray
+from std_msgs.msg import Int8
+from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
-# global paramters for velocity control
 cont = True
-# current velocity
-g_linearvel = 0.0  # x
-g_angularvel = 0.0  # z
-# past velocity at last loop
-g_past_linearvel = 0.0  # x
-g_past_angularvel = 0.0  # z
-# velocity command
-g_cmd_linear = 0.0  # x
-g_cmd_angular = 0.0  # z
-# activation rate of this node
-G_RATE = 10  # Hz
+
+# class for this node
 
 
-# velocity control
-def velocity_control(linear_vel, past_linear_vel, angular_vel, past_angular_vel, linear_cmd, angular_cmd):
-    global G_RATE
+class Velocity_Controller():
+    def __init__(self):
+        global cont
+        # initialize node
+        rospy.init_node('velocity_controller', disable_signals=True)
 
-    # local parameters
-    Pgain_LINEAR = 100.0
-    Dgain_LINEAR = 1.0
-    Pgain_ANGULAR = 40.0
-    Dgain_ANGULAR = 0.4
-    pwm_offset = 0.0  # command offset for robot rotation
-    pwm_L = 0  # command for left motor
-    pwm_R = 0  # command for right motor
-    dt = 1.0 / G_RATE  # cycle length (seconds)
+        # publisher for pwm command
+        self.pub_motor_commands = rospy.Publisher(
+            'motor_commands', Int16MultiArray, queue_size=1)
+        self.motor_command = Int16MultiArray()
+        self.motor_command.data.extend([0, 0])  # for motor commnad left/right
+        # self.motor_command.data.append(0)  # for right motor command
 
-    # PD control for linear velocity (didn't introduce I control to keep the code simple)
-    pwm_L = Pgain_LINEAR * (linear_cmd - linear_vel) - \
-        Dgain_LINEAR * (linear_vel - past_linear_vel) / dt
-    pwm_R = -1 * pwm_L
+        # publisher for operation mode
+        self.pub_operation_mode = rospy.Publisher(
+            'operation_mode', Int8, queue_size=1, latch=True)
+        # subscriber for wheel odometry
+        self.sub_odom = rospy.Subscriber('wheel_odometry_2wheel', Odometry,
+                                         self.callback_update_odometry, queue_size=1)
+        # subscriber for velocity command
+        self.sub_cmd_vel = rospy.Subscriber('cmd_vel', Twist,
+                                            self.callback_update_command, queue_size=1)
+        # subscriber for velocity command
+        self.sub_cmd_vel = rospy.Subscriber('joy', Joy,
+                                            self.callback_update_operationmode, queue_size=1)
 
-    # PD control for angular velocity
-    pwm_offset = Pgain_ANGULAR * \
-        (angular_cmd - angular_vel) - Dgain_ANGULAR * \
-        (angular_vel - past_angular_vel)
-    pwm_L = pwm_L - pwm_offset
-    pwm_R = pwm_R + pwm_offset
+        # parameters on velocity command
+        self.cmd_linear = 0.0
+        self.cmd_angular = 0.0
+        # parameters on rover velocity
+        self.linear_vel = 0.0
+        self.past_linear_vel = 0.0
+        self.err_linear_vel = 0.0
+        self.angular_vel = 0.0
+        self.past_angular_vel = 0.0
+        self.err_angular_vel = 0.0
+        # refresh rate of odometry
+        self.ODOM_RATE = 100.0
+        # parameters for operation mode
+        self.operation_mode = 0  # 0:teleop, 1:teleop_turbo, 2:autonomous
 
-    # regulate pwm command
-    pwm_L = regulate_pwm(pwm_L)
-    pwm_R = regulate_pwm(pwm_R)
-
-    # publish command
-    pwm_command.data[0] = pwm_L
-    pwm_command.data[1] = pwm_R
-    pub_pwm_commands.publish(pwm_command)
-
-
-# pwm command regulator
-def regulate_pwm(pwm):
-    if pwm > 127:
-        pwm = 127
-    elif pwm < -127:
-        pwm = -127
-    return pwm
-
-
-# callback : update velocity command
-def callback_update_command(twist):
-    global g_cmd_linear, g_cmd_angular
-    g_cmd_linear = twist.linear.x
-    g_cmd_angular = twist.angular.z
-
-
-# callback : store and update robot's velocity
-def callback_update_odometry(odometry):
-    global g_linearvel, g_past_linearvel, g_angularvel, g_past_angularvel
-    # store
-    g_past_linearvel = g_linearvel
-    g_past_angularvel = g_angularvel
-
-    # update
-    g_linearvel = odometry.twist.twist.linear.x
-    g_angularvel = odometry.twist.twist.angular.z
-
-
-def handler(signal, frame):
-    global cont
-    cont = False
-
-
-def velocity_controller_main():
-    global cont, G_RATE
-    rate = rospy.Rate(G_RATE)
-
-    while cont:
-        try:
-            velocity_control(g_linearvel, g_past_linearvel,
-                             g_angularvel, g_past_angularvel,
-                             g_cmd_linear, g_cmd_angular)
-
-        except KeyboardInterrupt:
-            cont = False
-
+        rate = rospy.Rate(100)
+        while cont:
+            try:
+                self.velocity_control(self.cmd_linear, self.cmd_angular)
+            except KeyboardInterrupt:
+                cont = False
         rate.sleep()
-    rospy.signal_shutdown('finished!')
-    rospy.spin()
+
+    def callback_update_odometry(self, odometry):
+        # store
+        self.past_linear_vel = self.linear_vel
+        self.past_angular_vel = self.angular_vel
+        # update
+        self.linear_vel = odometry.twist.twist.linear.x
+        self.angular_vel = odometry.twist.twist.angular.z
+
+    def callback_update_command(self, twist):
+        self.cmd_linear = twist.linear.x
+        self.cmd_angular = twist.angular.z
+        # print(self.cmd_linear, self.cmd_angular)
+        # self.velocity_control(cmd_linear, cmd_angular)
+
+    def callback_update_operationmode(self, joy):
+        # store current mode
+        current_mode = self.operation_mode
+
+        # chack joy command
+        self.operation_mode = 0  # disabled
+
+        if joy.buttons[3] == 1 and joy.buttons[5] == 1:
+            self.operation_mode = 3  # autonomous
+        if joy.buttons[4] == 1:
+            self.operation_mode = 1  # teleop
+        if joy.buttons[0] == 1:
+            self.operation_mode = 2  # teleop with turbo
+
+        # if mode has been changed
+        if self.operation_mode != current_mode:
+            self.pub_operation_mode.publish(self.operation_mode)
+
+    def velocity_control(self, cmd_linear, cmd_angular):
+        # parameters for gains
+        Pgain_LINEAR = 100.0
+        Igain_LINEAR = 0.007
+        Dgain_LINEAR = 0.25
+        Pgain_ANGULAR = 15.0
+        Igain_ANGULAR = 0.001
+        Dgain_ANGULAR = 0.03
+
+        # parameters for motor commands
+        command_offset = 0.0  # command offset for robot rotation
+        motor_command_L = 0  # for left motor
+        motor_command_R = 0  # for right motor
+        # cycle length (seconds) to get acceleration of the rover
+        dt = 1.0 / self.ODOM_RATE
+        # accumulated error for integral control
+        self.err_linear_vel += cmd_linear - self.linear_vel
+        self.err_angular_vel += cmd_angular - self.angular_vel
+
+        # PD control for linear velocity
+        # if cmd_linear == 0:
+        #     motor_command_L = 0
+        #     self.err_linear_vel = 0
+        # else:
+        motor_command_L = Pgain_LINEAR * (cmd_linear - self.linear_vel) - \
+            Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / \
+            dt + Igain_LINEAR * self.err_linear_vel
+        motor_command_R = -1 * motor_command_L
+
+        # if cmd_linear < 0:
+        #     cmd_angular = -1 * cmd_angular
+        #     self.err_angular_vel = 0
+        # PD control for angular velocity
+        # if cmd_angular == 0:
+        #     command_offset = 0
+        #     self.err_angular_vel = 0
+        # else:
+        command_offset = Pgain_ANGULAR * \
+            (cmd_angular - self.angular_vel) - Dgain_ANGULAR * \
+            (self.angular_vel - self.past_angular_vel) / dt + \
+            Igain_ANGULAR * self.err_angular_vel
+
+        # print(Pgain_LINEAR * (cmd_linear - self.linear_vel),
+        #       Dgain_LINEAR * (self.linear_vel - self.past_linear_vel) / dt,
+        #       Igain_LINEAR * self.err_linear_vel)
+        # print(Pgain_ANGULAR * (cmd_angular - self.angular_vel),
+        #       Dgain_ANGULAR * (self.angular_vel - self.past_angular_vel) / dt,
+        #       Igain_ANGULAR * self.err_angular_vel)
+        motor_command_L = motor_command_L - command_offset
+        motor_command_R = motor_command_R - command_offset
+
+        # regulate pwm command
+        motor_command_L = self.regulate_command(motor_command_L)
+        motor_command_R = self.regulate_command(motor_command_R)
+        self.publish_command(motor_command_L, motor_command_R)
+
+        self.last_time = time.time()
+
+    def publish_command(self, command_L, command_R):
+        self.motor_command.data[0] = command_L
+        self.motor_command.data[1] = command_R
+        self.pub_motor_commands.publish(self.motor_command)
+        pass
+
+    # pwm command regulator
+    def regulate_command(self, command):
+        # maximum output for motor driver : vnh5019. The maximum value is 400
+        # according to the driver library, but regulated up to 300 for motor
+        # protection drived at 14.8V, higher than nominal voltage : 12V
+        MAXIMUM_OUTPUT = 300
+
+        # regulate
+        if command > MAXIMUM_OUTPUT:
+            command = MAXIMUM_OUTPUT
+        elif command < -1 * MAXIMUM_OUTPUT:
+            command = -1 * MAXIMUM_OUTPUT
+
+        return command
+
+    def handler(signal, frame):
+        global cont
+        cont = False
 
 
 if __name__ == '__main__':
-    rospy.init_node('velocity_controller')
-
-    # publisher for pwm command
-    pub_pwm_commands = rospy.Publisher(
-        'pwm_commands', Int8MultiArray, queue_size=1)
-    pwm_command = Int8MultiArray()
-    pwm_command.data.append(0)  # for left motor commnad
-    pwm_command.data.append(0)  # for right motor command
-
-    # subscriber for wheel odometry
-    rospy.Subscriber('wheel_odometry_2wheel', Odometry,
-                     callback_update_odometry, queue_size=1)
-
-    # subscriber for velocity command
-    rospy.Subscriber('cmd_vel', Twist, callback_update_command, queue_size=1)
-
-    # signal handler for KeyboardInterrupt
-    signal.signal(signal.SIGINT, handler)
-
-    # main function
-    velocity_controller_main()
+    # make class
+    Velocity_Controller()

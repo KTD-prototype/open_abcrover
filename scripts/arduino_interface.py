@@ -14,175 +14,170 @@ from sensor_msgs.msg import Imu
 from wheel_odometry.msg import Encoder_2wheel
 
 cont = True
-g_pwm_L = 0
-g_pwm_R = 0
-g_operation_mode = 0  # 0:disabled, 1:teleop, 2:teleop_turbo, 3:autonomous
-G_NUM_OF_RECEIVE_DATA = 14  # 2 encoders, 4 quaternions, 2 battery voltages
 
 
-serial = serial.Serial('/dev/MEGA#1', 230400)
-serial.reset_input_buffer()
+class Arduino_Interface():
+    def __init__(self):
+        global cont
+        # initialize node
+        rospy.init_node('arduino_interface')
 
+        # publisher for encoders information
+        self.pub_encoder = rospy.Publisher(
+            'encoder_2wheel', Encoder_2wheel, queue_size=1)
+        self.encoder_data = Encoder_2wheel()
 
-# function to send command to arduino
-def send_data(command_L, command_R):
-    # shift command to ensure they are positive number
-    # print(command_L, command_R)
-    OFFSET = 300  # big enough than MAXIMUM_OUTPUT:300, but ensure don't exceed 32767
-    command_L = command_L + OFFSET
-    command_R = command_R + OFFSET
+        # publisher for imu data
+        self.imu_pub = rospy.Publisher('/imu', Imu, queue_size=1)
+        self.imu_data = Imu()
+        self.imu_data.header.frame_id = 'map'
 
-    # divide command by single byte
-    command_L_high, command_L_low = divide_command(command_L)
-    command_R_high, command_R_low = divide_command(command_R)
+        # subscriber for pwm data
+        rospy.Subscriber('motor_commands', Int16MultiArray,
+                         self.callback_update_command)
+        # subscriber for pwm data
+        rospy.Subscriber('operation_mode', Int8,
+                         self.callback_update_operationmode)
 
-    # generate a command as a series of characters
-    command = ['H', chr(g_operation_mode), chr(command_L_high), chr(
-        command_L_low), chr(command_R_high), chr(command_R_low)]
-    # command = ['H', chr(command_L), chr(command_R)]
-    # print(command)
-    serial.reset_input_buffer()  # flush buffer
-    serial.write(command)  # send
+        # wait until the arduino gets ready
+        # time.sleep(3)
+        rospy.loginfo("started communication between Arduino!")
 
+        # parameters
+        self.left_motor_command = 0
+        self.right_motor_command = 0
+        self.operation_mode = 0  # 0:disabled, 1:teleop, 2:teleop_turbo, 3:autonomous, 4:error
+  
+        # 2 encoders, 4 postures(@quaternion), 3 accelerometers(x,y,z), 3 gyros(roll, pitch,yaw), 2 battery voltages
+        self.NUM_OF_RECEIVED_DATA = 14
 
-def divide_command(command):
-    command_high = command >> 8
-    command_low = command & 0x00ff
-    return command_high, command_low
+        # start serial communication with arduino
+        self.serial = serial.Serial('/dev/MEGA#1', 230400)
+        time.sleep(1)  # wait until opening serial port completes
+        self.serial.reset_input_buffer()
 
+        rate = rospy.Rate(100)
+        while cont:
+            try:
+                # send motor command
+                self.send_data(self.left_motor_command,
+                               self.right_motor_command)
 
-def receive_data():
-    global G_NUM_OF_RECEIVE_DATA
-    received_data = [0.0] * G_NUM_OF_RECEIVE_DATA
-    reset_flag = False
+                # wait until rovor information arrives
+                while self.serial.inWaiting() < self.NUM_OF_RECEIVED_DATA * 4:  # 4 bytes per each data
+                    pass
 
-    for i in range(G_NUM_OF_RECEIVE_DATA):  # read 8 data line by line
-        received_data[i] = serial.readline()
-        received_data[i] = received_data[i].replace('\r\n', '')
+                # receive rover information
+                self.receive_data()
 
-        # TODO:procedure when arduino is reset >> turn reset_flag to True
-        if received_data[i] == '*************':
-            reset_flag = True
+            except KeyboardInterrupt:
+                cont = False
 
-        received_data[i] = float(received_data[i])
+            rate.sleep()
 
-    if reset_flag == True:
-        pass  # todo:process when arduino is reset
+        self.serial.close()
+        rospy.signal_shutdown('finished!')
+        rospy.spin()
 
-    else:
-        print(received_data)
+    # function to send command to arduino
+    def send_data(self, command_L, command_R):
+        # shift command to ensure they are positive number(include 0)
+        OFFSET = 300  # big enough to offset minimum_output:-300
+        command_L = command_L + OFFSET
+        command_R = command_R + OFFSET
 
-        # get and publish encoder info for wheel odometry
-        encoders_data.left_encoder = received_data[0]
-        encoders_data.right_encoder = received_data[1]
-        pub_encoders.publish(encoders_data)
+        # divide command by single byte
+        command_L_high, command_L_low = self.divide_command(command_L)
+        command_R_high, command_R_low = self.divide_command(command_R)
 
-        # get posture angle information:x,y,z,w
-        imu_data.orientation.x = received_data[2]
-        imu_data.orientation.y = received_data[3]
-        imu_data.orientation.z = received_data[4]
-        imu_data.orientation.w = received_data[5]
-        # get accelerometer data : x,y,z
-        imu_data.linear_acceleration.x = received_data[6]
-        imu_data.linear_acceleration.y = received_data[7]
-        imu_data.linear_acceleration.z = received_data[8]
-        # get gyro data ; x, y, z(roll,pitch,yaw)
-        imu_data.angular_velocity.x = received_data[9]
-        imu_data.angular_velocity.y = received_data[10]
-        imu_data.angular_velocity.z = received_data[11]
-        # publish imu data
-        imu_pub.publish(imu_data)
+        # generate a command as a series of characters
+        integrated_command = ['H', chr(self.operation_mode), chr(command_L_high), chr(
+            command_L_low), chr(command_R_high), chr(command_R_low)]
 
-        # euler = tf.transformations.euler_from_quaternion(
-        #     (received_data[2], received_data[3], received_data[4], received_data[5]))
-        # print(euler)
+        # send
+        self.serial.reset_input_buffer()  # flush buffer
+        self.serial.write(integrated_command)  # send
 
-        # check_battery_voltage(received_data[6], 1)
-        # check_battery_voltage(received_data[7], 2)
+    # function to divide command with 2 bytes into 1 each(high/low)
+    def divide_command(self, command):
+        command_high = command >> 8
+        command_low = command & 0x00ff
+        return command_high, command_low
 
-    serial.reset_input_buffer()  # flush buffer
+    # receive process
+    def receive_data(self):
+        received_data = [0.0] * self.NUM_OF_RECEIVED_DATA
+        reset_flag = False
 
+        for i in range(self.NUM_OF_RECEIVED_DATA):  # read 8 data line by line
+            received_data[i] = self.serial.readline()
+            received_data[i] = received_data[i].replace('\r\n', '')
 
-def check_battery_voltage(voltage, num):
-    THE_NUM_OF_CELLS = 4.0  # cells of Lipo battery
-    voltage = voltage / THE_NUM_OF_CELLS
-    if voltage > 1.0:  # only when battery is connected, at least
-        if voltage < 3.375:  # lower than 13.5V at 4S-Lipo
-            rospy.logfatal("voltage of battery #" + str(num) +
-                           " is low as " + str(voltage) + "[V/cell]")
+            # TODO:procedure when arduino is reset >> turn reset_flag to True
+            if received_data[i] == '*************':
+                reset_flag = True
 
+            # convert each received data (from string to float)
+            received_data[i] = float(received_data[i])
 
-def callback_update_command(command):
-    global g_pwm_L, g_pwm_R
-    # print(pwm_command.data[0], pwm_command.data[1])
-    g_pwm_L = command.data[0]
-    g_pwm_R = command.data[1]
+        # exceptional process
+        if reset_flag == True:
+            pass  # todo:process when arduino is reset
 
+        else:
+            print(received_data)
 
-def callback_update_operationmode(mode):
-    global g_operation_mode
-    g_operation_mode = mode.data
+            # get and publish encoder info for wheel odometry
+            self.encoder_data.left_encoder = received_data[0]
+            self.encoder_data.right_encoder = received_data[1]
+            self.pub_encoder.publish(self.encoder_data)
 
+            # get posture angle information:x,y,z,w
+            self.imu_data.orientation.x = received_data[2]
+            self.imu_data.orientation.y = received_data[3]
+            self.imu_data.orientation.z = received_data[4]
+            self.imu_data.orientation.w = received_data[5]
+            # get accelerometer data : x,y,z
+            self.imu_data.linear_acceleration.x = received_data[6]
+            self.imu_data.linear_acceleration.y = received_data[7]
+            self.imu_data.linear_acceleration.z = received_data[8]
+            # get gyro data ; x, y, z(roll,pitch,yaw)
+            self.imu_data.angular_velocity.x = received_data[9]
+            self.imu_data.angular_velocity.y = received_data[10]
+            self.imu_data.angular_velocity.z = received_data[11]
+            # publish imu data
+            self.imu_pub.publish(self.imu_data)
 
-def handler(signal, frame):
-    global cont
-    cont = False
+            # euler = tf.transformations.euler_from_quaternion(
+            #     (received_data[2], received_data[3], received_data[4], received_data[5]))
+            # print(euler)
 
+            self.check_battery_voltage(received_data[12], 1)
+            self.check_battery_voltage(received_data[13], 2)
 
-def arduino_interface_main():
-    global cont, G_NUM_OF_RECEIVE_DATA
+        self.serial.reset_input_buffer()  # flush buffer
 
-    rate = rospy.Rate(100)
-    while cont:
-        try:
-            # print('send start')
-            send_data(g_pwm_L, g_pwm_R)
-            # print('send end')
+    def check_battery_voltage(self, voltage, num):
+        THE_NUM_OF_CELLS = 4.0  # cells of Lipo battery
+        voltage = voltage / THE_NUM_OF_CELLS
+        if voltage > 1.0:  # only when battery is connected, at least
+            if voltage < 3.6:  # lower than 14.4V at 4S-Lipo
+                rospy.logwarn("voltage of battery #" + str(num) +
+                              " is low as " + str(voltage) + "[V/cell]")
 
-            while serial.inWaiting() < G_NUM_OF_RECEIVE_DATA * 4:
-                # todo : at first I thought that waiting data should be more than 4bytes/data
-                #        but it doesn't work
-                pass
-            # print('receive start')
-            receive_data()
-            # print('receive end')
+    def callback_update_command(self, command):
+        # print(pwm_command.data[0], pwm_command.data[1])
+        self.left_motor_command = command.data[0]
+        self.right_motor_command = command.data[1]
 
-        except KeyboardInterrupt:
-            cont = False
+    def callback_update_operationmode(self, mode):
+        self.operation_mode = mode.data
 
-        rate.sleep()
-
-    serial.close()
-    rospy.signal_shutdown('finished!')
-    rospy.spin()
+    def handler(self, signal, frame):
+        global cont
+        cont = False
 
 
 if __name__ == '__main__':
-    rospy.init_node('arduino_interface')
-
-    # publisher for encoders information
-    pub_encoders = rospy.Publisher(
-        'encoder_2wheel', Encoder_2wheel, queue_size=1)
-    encoders_data = Encoder_2wheel()
-
-    # publisher for imu data
-    imu_pub = rospy.Publisher('/imu', Imu, queue_size=1)
-    imu_data = Imu()
-    imu_data.header.frame_id = 'map'
-
-    # subscriber for pwm data
-    rospy.Subscriber('motor_commands', Int16MultiArray,
-                     callback_update_command)
-    # subscriber for pwm data
-    rospy.Subscriber('operation_mode', Int8,
-                     callback_update_operationmode)
-
-    # wait until arduino gets ready
-    time.sleep(3)
-    print("started!")
-
-    # signal handler for KeyboardInterrupt
-    signal.signal(signal.SIGINT, handler)
-
-    # main function
-    arduino_interface_main()
+    # make instance from the class:Arduino_Interface
+    Arduino_Interface()
