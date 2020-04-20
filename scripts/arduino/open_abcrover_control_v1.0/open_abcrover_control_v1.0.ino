@@ -17,6 +17,7 @@
 #define ENC_RB 19           // right motor, phaseB
 #define VOLTAGE_MONITOR1 A2 // voltage monitor
 #define VOLTAGE_MONITOR2 A3 // voltage monitor
+#define LED_BUILTIN 13      // CAUTION! used by the motor drivers
 #define ALERT_LED 52        // a pin the series of full-color LEDs are connected
 #define NUMPIXELS 2         // the number of full-color LEDs
 
