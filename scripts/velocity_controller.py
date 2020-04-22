@@ -56,12 +56,32 @@ class Velocity_Controller():
         # refresh rate of odometry
         self.ODOM_RATE = 100.0
         # parameters for operation mode
-        self.operation_mode = 0  # 0:teleop, 1:teleop_turbo, 2:autonomous
+        # 0:disabled, 1:teleop, 2:teleop_turbo, 3:autonomous, else:something wrong
+        self.operation_mode = 0
+        self.last_command_time = 0  # time when the last teleop command was received
+        # WDT of teleop : time passed since last teleop command was received
+        self.interval_from_last_command = 0
 
         rate = rospy.Rate(100)
         while cont:
             try:
+                # check teleoperability before command generation
+                current_time = time.time()
+                self.interval_from_last_command += current_time - self.last_command_time
+
+                # WDT:if ros_msg:/joy isn't refreshed for over 0.5[sec], maybe comm link is lost
+                if self.interval_from_last_command > 0.5:
+                    # change mode and publish
+                    self.operation_mode = 4
+                    self.pub_operation_mode.publish(self.operation_mode)
+                    # motor disable will done in velocity control function
+
+                # velocity control
                 self.velocity_control(self.cmd_linear, self.cmd_angular)
+
+                # store current time
+                self.last_command_time = current_time
+
             except KeyboardInterrupt:
                 cont = False
         rate.sleep()
@@ -81,6 +101,9 @@ class Velocity_Controller():
         # self.velocity_control(cmd_linear, cmd_angular)
 
     def callback_update_operationmode(self, joy):
+        # if this func is called, it means com-link joy-PC are OK
+        self.interval_from_last_command = 0  # reset WDT
+
         # store current mode
         current_mode = self.operation_mode
 
@@ -152,9 +175,21 @@ class Velocity_Controller():
         # regulate pwm command
         motor_command_L = self.regulate_command(motor_command_L)
         motor_command_R = self.regulate_command(motor_command_R)
-        self.publish_command(motor_command_L, motor_command_R)
 
-        self.last_time = time.time()
+        # safety module : if somothing wrong, disable both velocity and motor command
+        if self.operation_mode == 4:
+            # disable velocity command and related parameters
+            self.cmd_linear = 0
+            self.cmd_angular = 0
+            self.err_linear_vel = 0
+            self.err_angular_vel =0
+
+            # disable motor command
+            motor_command_L = 0
+            motor_command_R = 0
+
+        # publish motor command
+        self.publish_command(motor_command_L, motor_command_R)
 
     def publish_command(self, command_L, command_R):
         self.motor_command.data[0] = command_L

@@ -2,5 +2,6 @@
     "board": "arduino:avr:mega",
     "configuration": "cpu=atmega2560",
     "port": "/dev/ttyACM0",
-    "sketch": "scripts/arduino/open_abcrover_control_v1.0/open_abcrover_control_v1.0.ino"
+    "sketch": "scripts/arduino/open_abcrover_control_v1.0/open_abcrover_control_v1.0.ino",
+    "output": "../ArduinoOutput"
 }
