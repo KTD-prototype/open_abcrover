@@ -45,11 +45,11 @@ Detailed documents are arriving soon!
 
 # Install
 ### assume your workspace are named ~/catkin_ws
-```
+`
 $ cd ~/catkin_ws/src
 $ git clone git@github.com:KTD-prototype/open_abcrover.git #main package
 $ git clone git@github.com:KTD-prototype/wheel_odometry.git #wheel odometry package
 $ sudo apt install ros-melodic-joy ros-melodic-joystick-teleop #additional packages
 $ cd ~/catkin_ws
 $ catkin_make
-```
+`
