@@ -88,4 +88,29 @@ Be careful to use Li-po or Li-ion batteries, not to over-charge, over-discharge,
 <br>
 
 ## Launch!
+Type as bellow at your terminal.
+```
+$ roslaunch open_abcrover teleop_sample.launch
+```
+
+This file launchs all relative nodes to test default settings for remote operation via your joystick.
+
+
+## Discription
+### Nodes
+* **/joy_node** : Receive signals from joystick and send as commands from an operator
+* **/teleop_twist_joy** : Receive commands from an operator and convert into velocity commands. Also regulates maximum gains of the velocity control by those paramters.
+* **/velocity_controller** : Receive the velocity commands and convert into motor commands by PID control. Also receives joy command directly to check what operational mode the rover is.
+* **/arduino_interface** : Receive the motor commands and send them to arduino. Receive IMU, encoder, battery voltage data and publish them.
+* **/wheel_odometry** : Receive encoder data and calculate position, velocity and posture of the rover, and publish them.
+
+
+### Messages
+* **/joy** : Raw commands from an operator
+* **/cmd_vel** : Velocity command from an operator, with Twist message.
+* **/motor_commands** : Motor comand for each two motors, calculated by PID controller in the velocity_controller node. Regulated not to exceed the motor capacity.
+* **/operation_mode** : Indicates whether remote operation is enabled or not, turbo drive is enabled or not, and check joystick connection or other exceptional states of control system.
+* **/encoder_2wheel** : Incremented encoder data from two motors.
+* **/imu** : Imu data includes posture angle at quaternions, gyros, accelerometers.
+* **/wheel_odometry** : Position, velocity and posture calculated by motor encoders.
 
