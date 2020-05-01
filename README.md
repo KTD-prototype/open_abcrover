@@ -105,7 +105,7 @@ By default, you can enable remote operation by button LB, and get the rover move
 
 Furthermore, you can enable **TURBO** mode to raise the maximum speed up to **4 km/h** , by pressing A button.
 
-Buttion assignment and labels are according to joystick I used : [Locitech F710](https://www.logitechg.com/en-us/products/gamepads/f710-wireless-gamepad.940-000117.html) with **X-Input** mode.
+Button assignment and labels are according to joystick I used : [Locitech F710](https://www.logitechg.com/en-us/products/gamepads/f710-wireless-gamepad.940-000117.html) with **X-Input** mode.
 
 
 ### Nodes
