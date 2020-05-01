@@ -29,13 +29,13 @@ It is :
 <br>
 
 ## Basic spesification
-|General specification||
+|>|General specification|
 |:--|:--|
 |Dimensions|W 250 * D 250 * H 250 [mm] at minimum assembly|
 |Foot prints|350 [mm] diameter circle|
 |Battery capacity|120 Wh for up to 2 hours operation|
 |Ground clearance|55 [mm]|
-|**Chassis**|
+|>|**Chassis**|
 |Frames|20 * 20 [mm] aluminum beams|
 |Brackets|3D printed with PETG or carbon PETG|
 |Additionals|You can mount more beams and add your hardwares by M4 bolts and nuts.|
