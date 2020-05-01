@@ -65,8 +65,20 @@ Upload them to your own board. The main file is named : open_abcrover_control_v1
 
 # How to use
 ## Power source
-Any types of batteies can be used. In testing, I used two 4-cell Li-po batteries(14.8V at nominal voltage) One for motors[^1], another for on-board computer with DCDC convirsion into 5V via BEC (battery eliminator circuitry)
+Any types of batteies can be used. In testing, I used two 4-cell Li-po batteries(14.8V at nominal voltage) One for motors, another for on-board computer with DCDC convirsion into 5V via BEC (battery eliminator circuitry)
 
-[^1]: In my choice, maximum voltage acceptable to motors are 12V. In those case, you have to regulate motor command by your own script.
+In my choice, maximum voltage acceptable to motors are 12V. In those case, you have to regulate motor command by your own script.
 
-[^2]: Be careful to use Li-po or Li-ion batteries, not to over-charge, over-discharge, damage batteries!
+Be careful to use Li-po or Li-ion batteries, not to over-charge, over-discharge, damage batteries!
+
+<br>
+
+## Check before operation
+* Power source connection?
+* All peripherals connected? (e.g. USB wireless receiver for your joystick)
+* No shorted circuit? Be super-carefule especially around power source wiring such as terminal blocks.
+* Wheels and boards are firmly mounted?
+
+
+<br>
+## Launch!
