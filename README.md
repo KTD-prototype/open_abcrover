@@ -29,7 +29,30 @@ It is :
 <br>
 
 ## Basic spesification
-* General specification (in general, depends on your components choice)
+|General specification||
+|:--|:--|
+|Dimensions|W 250 * D 250 * H 250 [mm] at minimum assembly|
+|Foot prints|350 [mm] diameter circle|
+|Battery capacity|120 Wh for up to 2 hours operation|
+|Ground clearance|55 [mm]|
+|**Chassis**|
+|Frames|20 * 20 [mm] aluminum beams|
+|Brackets|3D printed with PETG or carbon PETG|
+|Additionals|You can mount more beams and add your hardwares by M4 bolts and nuts.|
+|**Drive trains**|
+|Motors|Geared, brushed DC motor with 37mm diameter, 317rpm @maximum spped, 3.6N・m @stall by [servocity](https://www.servocity.com/317-rpm-spur-gear-motor-w-encoder)|
+|Wheels|6 inch diameter, driven wheels|
+|Casters|3 inch diameter, passive casters|
+|**Electronics and sensors**|
+|PC|[Jetson Nano Developer Kit (ver.B01)](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)|
+|MPU|[Arduino Mega 2560 REV3](https://store.arduino.cc/usa/mega-2560-r3)|
+|IMU sensor|9 axis sensor [Adafruit BNO055](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor)|
+|Motor encoders|mounted on each motor axes|
+|Cameras|(*not used by default*)  Sainsmart IMX219 night vision camera module with 160° FOV, 8MP relosution, active IR flash (discontinued? [equivalents](https://www.sainsmart.com/products/sainsmart-imx219-night-vision-camera-module-for-nvidia-jetson-nano-board-8mp-sensor-77-degree-fov)) 
+|
+
+
+<!-- * General specification (in general, depends on your components choice)
   *  Dimensions : W 250 * D 250 * H 250[mm] at minimum assembly
   *  Foot prints : approximately 350[mm] diameter circle
   *  Battery capacity : 120 Wh for up to 2 hours operation.
@@ -50,7 +73,7 @@ It is :
   * MPU : [Arduino Mega 2560 REV3](https://store.arduino.cc/usa/mega-2560-r3)
   * IMU sensor : 9 axis sensor [Adafruit BNO055](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor)
   * Motor encoders : mounted on each motor axes
-  * Camera : (*not used by default*)  Sainsmart IMX219 night vision camera module with 160° FOV, 8MP relosution, active IR flash (discontinued? [equivalents](https://www.sainsmart.com/products/sainsmart-imx219-night-vision-camera-module-for-nvidia-jetson-nano-board-8mp-sensor-77-degree-fov)) 
+  * Camera : (*not used by default*)  Sainsmart IMX219 night vision camera module with 160° FOV, 8MP relosution, active IR flash (discontinued? [equivalents](https://www.sainsmart.com/products/sainsmart-imx219-night-vision-camera-module-for-nvidia-jetson-nano-board-8mp-sensor-77-degree-fov))  -->
 
 <br>
 <br>
