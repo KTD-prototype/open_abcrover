@@ -65,7 +65,7 @@ Upload them to your own board. The main file is named : open_abcrover_control_v1
 
 # How to use
 ## Power source
-Any types of batteies can be used. In testing, I used two 4-cell Li-po batteries(14.8V at nominal voltage) One for motors [^1] , another for on-board computer with DCDC convirsion into 5V via BEC (battery eliminator circuitry)
+Any types of batteies can be used. In testing, I used two 4-cell Li-po batteries(14.8V at nominal voltage) One for motors[^1], another for on-board computer with DCDC convirsion into 5V via BEC (battery eliminator circuitry)
 
 [^1]: In my choice, maximum voltage acceptable to motors are 12V. In those case, you have to regulate motor command by your own script.
 
