@@ -1,8 +1,6 @@
 <!-- # open_abcrover -->
 &nbsp;&nbsp;<img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/rover_overview.jpg" width="480">
-
 <br>
-
 &nbsp;&nbsp;<img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/logo.jpg" width="360">
 
 # Overview
