@@ -35,15 +35,21 @@ It is :
 |Foot prints|350 [mm] diameter circle|
 |Battery capacity|120 Wh for up to 2 hours operation|
 |Ground clearance|55 [mm]|
-|**Chassis**||
+
+|Chassis||
+|:--|:--|
 |Frames|20 * 20 [mm] aluminum beams|
 |Brackets|3D printed with PETG or carbon PETG|
 |Additionals|You can mount more beams and add your hardwares by M4 bolts and nuts.|
-|**Drive trains**||
+
+|Drive trains||
+|:--|:--|
 |Motors|Geared, brushed DC motor with 37mm diameter, 317rpm @maximum spped, 3.6N・m @stall by [servocity](https://www.servocity.com/317-rpm-spur-gear-motor-w-encoder)|
 |Wheels|6 inch diameter, driven wheels|
 |Casters|3 inch diameter, passive casters|
-|**Electronics and sensors**||
+
+|Electronics||
+|:--|:--|
 |PC|[Jetson Nano Developer Kit (ver.B01)](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)|
 |MPU|[Arduino Mega 2560 REV3](https://store.arduino.cc/usa/mega-2560-r3)|
 |IMU sensor|9 axis sensor [Adafruit BNO055](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor)|
