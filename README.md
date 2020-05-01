@@ -29,4 +29,17 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 * Joy stick : [Logitec F710 wireless gamepad](https://www.logitechg.com/en-us/products/gamepads/f710-wireless-gamepad.940-000117.html)
 
 ## Packages
-* 
+* wheel odometry for differential-drive wheeled robot : [wheel_odometry](https://github.com/KTD-prototype/wheel_odometry)
+* joy signal processing : [joy - ROS Wiki](http://wiki.ros.org/joy)
+* velocity command generator from joy : [joy_teleop - ROS Wiki](http://wiki.ros.org/joy_teleop)
+
+<br>
+<br>
+
+# Part list and assembly
+Detailed documents are arriving soon!
+
+<br>
+<br>
+
+# Install
