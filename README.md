@@ -45,7 +45,7 @@ Detailed documents are arriving soon!
 
 # Install
 ### assume your workspace are named ~/catkin_ws
-```python
+```
 $ cd ~/catkin_ws/src
 $ git clone git@github.com:KTD-prototype/open_abcrover.git #main package
 $ git clone git@github.com:KTD-prototype/wheel_odometry.git #wheel odometry package
