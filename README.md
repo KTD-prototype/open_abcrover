@@ -96,6 +96,8 @@ $ roslaunch open_abcrover teleop_sample.launch
 This file launchs all relative nodes to test default settings for remote operation via your joystick.
 
 
+<br>
+
 ## Discription
 ### Nodes
 * **/joy_node** : Receive signals from joystick and send as commands from an operator
