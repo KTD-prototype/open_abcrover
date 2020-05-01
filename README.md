@@ -99,6 +99,15 @@ This file launchs all relative nodes to test default settings for remote operati
 <br>
 
 ## Discription
+### Remote operation
+Once you launched as discripted above, you can drive the rover by your joy stick.
+By default, you can enable remote operation by button LB, and get the rover move by left joystick. The maximum speed for this mode is around **1 km/h**.
+
+Furthermore, you can enable **TURBO** mode to raise the maximum speed up to **4 km/h** , by pressing A button.
+
+Buttion assignment and labels are according to joystick I used : [Locitech F710](https://www.logitechg.com/en-us/products/gamepads/f710-wireless-gamepad.940-000117.html) with **X-Input** mode.
+
+
 ### Nodes
 * **/joy_node** : Receive signals from joystick and send as commands from an operator
 * **/teleop_twist_joy** : Receive commands from an operator and convert into velocity commands. Also regulates maximum gains of the velocity control by those paramters.
@@ -116,3 +125,15 @@ This file launchs all relative nodes to test default settings for remote operati
 * **/imu** : Imu data includes posture angle at quaternions, gyros, accelerometers.
 * **/wheel_odometry** : Position, velocity and posture calculated by motor encoders.
 
+<br>
+
+### Indicators
+The code suppose to have two full-color LEDs on the rover's circuit, connnected to your arduino.
+By default, each colors indicates as below:
+* Blue : The rover is ready, but not engaged for remote operation.
+* Green : Remote operation is engaged, maximum speed is 1 km/h approx.
+* Yellow : Remote operation with turbo is engaged, maximum speed is 4 km/h approx.
+* White : Autonomous driving is engaged (*planning to implement in future!*)
+* Red : Communication link between on-board PC and joystick has lost. (*also for other exceptional states, in future!*)
+
+The two LEDs will blinks when the battery voltages are getting low. By default, blinks every 0.75 seconds under 3.6 V/cell, every 0.25 seconds under 3.375 V/cell.
