@@ -37,10 +37,19 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 <br>
 <br>
 
-# Part list and assembly
+# Part list and Assembly
 Detailed documents are arriving soon!
 
 <br>
 <br>
 
 # Install
+### assume your workspace are named ~/catkin_ws
+```python
+$ cd ~/catkin_ws/src
+$ git clone git@github.com:KTD-prototype/open_abcrover.git #main package
+$ git clone git@github.com:KTD-prototype/wheel_odometry.git #wheel odometry package
+$ sudo apt install ros-melodic-joy ros-melodic-joystick-teleop #additional packages
+$ cd ~/catkin_ws
+$ catkin_make
+```
