@@ -37,13 +37,13 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 <br>
 <br>
 
-# Part list and Assembly
+# Part list, assembly and wiring
 Detailed documents are arriving soon!
 
 <br>
 <br>
 
-# Install
+# Install Software
 ## Install, download and build related packages
 Assume your workspace are named as ~/catkin_ws
 ```
@@ -59,3 +59,14 @@ $ catkin_make
 Pick up codes from the directroy you've downloaded ; .../open_abcrover/scripts/arduino/open_abcrover_control_v1.0  
 
 Upload them to your own board. The main file is named : open_abcrover_control_v1.0.ino
+
+<br>
+<br>
+
+# How to use
+## Power source
+Any types of batteies can be used. In testing, I used two 4-cell Li-po batteries(14.8V at nominal voltage) One for motors[^1][^2], another for on-board computer with DCDC convirsion into 5V via BEC (battery eliminator circuitry)
+
+[^1]: In my choice, maximum voltage acceptable to motors are 12V. In those case, you have to regulate motor command by your own script.
+
+[^2]: Be careful to use Li-po or Li-ion batteries, not to over-charge, over-discharge, damage batteries!
