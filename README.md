@@ -44,12 +44,17 @@ Detailed documents are arriving soon!
 <br>
 
 # Install
-### assume your workspace are named ~/catkin_ws
-`
+## Install, download and build related packages
+Assume your workspace are named as ~/catkin_ws
+```
 $ cd ~/catkin_ws/src
 $ git clone git@github.com:KTD-prototype/open_abcrover.git #main package
 $ git clone git@github.com:KTD-prototype/wheel_odometry.git #wheel odometry package
 $ sudo apt install ros-melodic-joy ros-melodic-joystick-teleop #additional packages
 $ cd ~/catkin_ws
 $ catkin_make
-`
+```
+
+## Prepare sub-onboard comtroller : arduino mega or equivalents
+Pick up codes from the directroy you've downloaded ; .../open_abcrover/scripts/arduino/open_abcrover_control_v1.0
+Upload them to your own board. The main file is named : open_abcrover_control_v1.0.ino
