@@ -8,10 +8,11 @@ It is :
     * Main chassis made of aluminum extruded beam
     * Cheap and easy-to-by electronics
     * 3D printed brackets and mounts easy to be customized
-* Usable in any terrain
+  
+* All terrain driving
     * High power motor and big wheel
     * Moderate size for indoor use, same foot print as domestic robotic vacuums
-    * Convertible brackets to boost up wheel base and tread width for stable outdoor maneuver
+    * Convertible brackets to boost up wheel base and tread width for stable outdoor locomotion
     
 <br>
 <br>
