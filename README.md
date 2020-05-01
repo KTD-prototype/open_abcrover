@@ -1,2 +1,2 @@
 # open_abcrover
-open source platform for autonomous driving experiments
+Open source platform for autonomous / remote-operated driving experiments
