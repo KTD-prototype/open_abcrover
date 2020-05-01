@@ -4,6 +4,22 @@
 <img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/banner.jpg" width="720">
 </div>
 
+- [Overview](#overview)
+  - [General information](#general-information)
+  - [Basic spesification](#basic-spesification)
+- [Operability confirmed environments](#operability-confirmed-environments)
+  - [PC environments (both develop and operate)](#pc-environments-both-develop-and-operate)
+  - [Peripherals](#peripherals)
+  - [Packages](#packages)
+- [Part list, assembly and wiring](#part-list-assembly-and-wiring)
+- [Install Software](#install-software)
+  - [Install, download and build related packages](#install-download-and-build-related-packages)
+  - [Prepare sub-onboard comtroller : arduino mega or equivalents](#prepare-sub-onboard-comtroller--arduino-mega-or-equivalents)
+- [How to use](#how-to-use)
+  - [Power source](#power-source)
+  - [Check before operation](#check-before-operation)
+  - [Launch!](#launch)
+  - [Discription](#discription)
 
 
 # Overview
@@ -137,7 +153,7 @@ This file launchs all relative nodes to test default settings for remote operati
 <br>
 
 ## Discription
-### Remote operation
+**Remote operation**  
 Once you launched as discripted above, you can drive the rover by your joy stick.
 By default, you can enable remote operation by button LB, and get the rover move by left joystick. The maximum speed for this mode is around **1 km/h**.
 
@@ -146,15 +162,18 @@ Furthermore, you can enable **TURBO** mode to raise the maximum speed up to **4 
 Button assignment and labels are according to joystick I used : [Locitech F710](https://www.logitechg.com/en-us/products/gamepads/f710-wireless-gamepad.940-000117.html) with **X-Input** mode.
 
 
-### Nodes
+<br>
+
+**Nodes**
 * **/joy_node** : Receive signals from joystick and send as commands from an operator
 * **/teleop_twist_joy** : Receive commands from an operator and convert into velocity commands. Also regulates maximum gains of the velocity control by those paramters.
 * **/velocity_controller** : Receive the velocity commands and convert into motor commands by PID control. Also receives joy command directly to check what operational mode the rover is.
 * **/arduino_interface** : Receive the motor commands and send them to arduino. Receive IMU, encoder, battery voltage data and publish them.
 * **/wheel_odometry** : Receive encoder data and calculate position, velocity and posture of the rover, and publish them.
 
+<br>
 
-### ROS Messages
+**ROS Messages**  
 * **/joy** : Raw commands from an operator
 * **/cmd_vel** : Velocity command from an operator, with Twist message.
 * **/motor_commands** : Motor comand for each two motors, calculated by PID controller in the velocity_controller node. Regulated not to exceed the motor capacity.
@@ -169,7 +188,7 @@ Whole relationships of the nodes and messages are as bellow.
 
 <br>
 
-### Indicators
+**Indicators**  
 The code suppose to have two full-color LEDs on the rover's circuit, connnected to your arduino.
 By default, each colors indicates as below:
 * Blue : The rover is ready, but not engaged for remote operation.
