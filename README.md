@@ -1,5 +1,6 @@
 <!-- # open_abcrover -->
-<img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/logo.jpg" width="540"><img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/rover_overview.jpg" width="480">
+<img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/rover_overview.jpg" width="480">
+    <img src="https://github.com/KTD-prototype/open_abcrover/blob/media/media/logo.jpg" width="360">
 
 # Overview
 This is an open source, affordable ground platform for remote-operated & autonomous driving experiments.
