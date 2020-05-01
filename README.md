@@ -56,5 +56,6 @@ $ catkin_make
 ```
 
 ## Prepare sub-onboard comtroller : arduino mega or equivalents
-Pick up codes from the directroy you've downloaded ; .../open_abcrover/scripts/arduino/open_abcrover_control_v1.0
+Pick up codes from the directroy you've downloaded ; .../open_abcrover/scripts/arduino/open_abcrover_control_v1.0  
+
 Upload them to your own board. The main file is named : open_abcrover_control_v1.0.ino
