@@ -101,7 +101,7 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 
 <br>
 
-<img srf = "https://github.com/KTD-prototype/open_abcrover/blob/media/media/rendering_integ.jpg" width="720">
+<img src = "https://github.com/KTD-prototype/open_abcrover/blob/media/media/rendering_integ.jpg" width="720">
 
 <br>
 <br>
