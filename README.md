@@ -14,7 +14,7 @@
   - [PC environments (both develop and operate)](#pc-environments-both-develop-and-operate)
   - [Peripherals](#peripherals)
   - [Packages](#packages)
-- [Part list, assembly and wiring](#part-list-assembly-and-wiring)
+- [Parts list, assembly and wiring](#parts-list-assembly-and-wiring)
 - [Install Software](#install-software)
   - [Install, download and build related packages](#install-download-and-build-related-packages)
   - [Prepare sub-onboard comtroller : arduino mega or equivalents](#prepare-sub-onboard-comtroller--arduino-mega-or-equivalents)
@@ -100,7 +100,7 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 <br>
 <br>
 
-# Part list, assembly and wiring
+# Parts list, assembly and wiring
 ***Detailed documents are arriving soon!***
 
 <br>
