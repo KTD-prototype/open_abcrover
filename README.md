@@ -106,8 +106,15 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 <br>
 
 One noticeable feature of this rover is it's convertibility between outdoor mode and indoor mode.  
+
+
 As you can see in a schematic iamge below, you can flip or offset the brackets so that you can boost up or shrink the rover's wheel base and tread width.  
+
+
 At left side of the image, it's outdoor mode with bigger wheel base and tread width, to improve stability on rough terrain. At right side, it's indoor mode with less foot print to improve smooth movement in narrow area.  
+
+<br>
+
 <img src = "https://github.com/KTD-prototype/open_abcrover/blob/media/media/rendering_integ.jpg" width="960" title = "left : outdoor mode, right : indoor mode">
 
 <br>
