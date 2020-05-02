@@ -100,6 +100,10 @@ The open ABC rover is developed and tested conditions below. Of course, you can 
 *Detailed documents are arriving soon!*
 
 <br>
+
+<img srf = "https://github.com/KTD-prototype/open_abcrover/blob/media/media/rendering_integ.jpg" width="720">
+
+<br>
 <br>
 
 # Install Software
