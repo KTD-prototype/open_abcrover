@@ -116,6 +116,7 @@ At left side of the image, it's outdoor mode with bigger wheel base and tread wi
 <br>
 
 <img src = "https://github.com/KTD-prototype/open_abcrover/blob/media/media/rendering_integ.jpg" width="960" title = "left : outdoor mode, right : indoor mode">
+<div align="center">left : outdoor mode, right : indoor mode</div>
 
 <br>
 <br>
