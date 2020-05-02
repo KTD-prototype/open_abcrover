@@ -51,6 +51,7 @@ It is :
 |Foot prints|350 [mm] diameter circle|
 |Battery capacity|120 Wh for up to 2 hours operation|
 |Ground clearance|55 [mm]|
+|Total weight|3.6 [kg]|
 
 |Chassis||
 |:--|:--|
