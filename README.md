@@ -9,6 +9,7 @@
 
 - [Overview](#overview)
   - [General information](#general-information)
+  - [How does it moves](#how-does-it-moves)
   - [Basic spesification](#basic-spesification)
 - [Operability confirmed environments](#operability-confirmed-environments)
   - [PC environments (both develop and operate)](#pc-environments-both-develop-and-operate)
@@ -44,6 +45,14 @@ It is :
   * Minimum hardwares and electronics for remote operation can be built with around $400 USD or ¥40,000 JPY
 
 <small id="note1">ROS is a trademark of Open Robotics.</small>
+
+<br>
+
+## How does it moves
+Link to my youtube.  
+
+[![](https://img.youtube.com/vi/tylhsJ_iiBY/0.jpg)](https://www.youtube.com/watch?v=tylhsJ_iiBY)
+
 
 <br>
 
@@ -116,6 +125,7 @@ At left side of the image, it's outdoor mode with bigger wheel base and tread wi
 <br>
 
 <img src = "https://github.com/KTD-prototype/open_abcrover/blob/media/media/rendering_integ.jpg" width="960" title = "left : outdoor mode, right : indoor mode">
+<div align="center">left : outdoor mode, right : indoor mode</div>
 
 <br>
 <br>
