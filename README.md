@@ -49,7 +49,7 @@ It is :
 <br>
 
 ## How does it moves
-[![](https://img.youtube.com/vi/tylhsJ_iiBY&feature=youtu.be/0.jpg)](https://www.youtube.com/watch?v=tylhsJ_iiBY&feature=youtu.be)
+[![](https://img.youtube.com/vi/tylhsJ_iiBY/0.jpg)](https://www.youtube.com/watch?v=tylhsJ_iiBY)
 
 
 <br>
