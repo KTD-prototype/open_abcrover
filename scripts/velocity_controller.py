@@ -97,7 +97,7 @@ class Velocity_Controller():
     def callback_update_command(self, twist):
         self.cmd_linear = twist.linear.x
         self.cmd_angular = twist.angular.z
-        print(self.cmd_linear, self.cmd_angular)
+        # print(self.cmd_linear, self.cmd_angular)
         # self.velocity_control(cmd_linear, cmd_angular)
 
     def callback_update_operationmode(self, joy):
