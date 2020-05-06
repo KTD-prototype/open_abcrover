@@ -124,10 +124,10 @@ class Velocity_Controller():
     def velocity_control(self, cmd_linear, cmd_angular):
         # parameters for gains
         Pgain_LINEAR = 100.0
-        Igain_LINEAR = 0.007
+        Igain_LINEAR = 0.0
         Dgain_LINEAR = 0.25
         Pgain_ANGULAR = 15.0
-        Igain_ANGULAR = 0.001
+        Igain_ANGULAR = 0.0
         Dgain_ANGULAR = 0.03
 
         # parameters for motor commands
