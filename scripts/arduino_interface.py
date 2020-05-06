@@ -125,7 +125,7 @@ class Arduino_Interface():
             pass  # todo:process when arduino is reset
 
         else:
-            print(received_data)
+            # print(received_data)
 
             # get and publish encoder info for wheel odometry
             self.encoder_data.left_encoder = received_data[0]
