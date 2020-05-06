@@ -138,8 +138,8 @@ void loop()
                         command_R = receive_data() - offset;
 
                         // drive motors
-                        if (operation_mode == 0)
-                        { // if the command is disabled
+                        if (operation_mode == 4)
+                        { // if there is something wrong
                                 // motor_drive(0, 0);
                                 command_L = 0;
                                 command_R = 0;
