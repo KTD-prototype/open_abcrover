@@ -23,6 +23,8 @@
     <param name="scale_linear_turbo" value="1.11"/>
     <param name="axis_angular" value="0"/>
     <param name="scale_angular" value="3.5"/>
+
+    <remap from="/cmd_vel" to="/teleop/cmd_vel"/>
   </node>
 
   <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map frame 100"/>

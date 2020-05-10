@@ -37,7 +37,7 @@ class Velocity_Controller():
         self.sub_odom = rospy.Subscriber('wheel_odometry_2wheel', Odometry,
                                          self.callback_update_odometry, queue_size=1)
         # subscriber for velocity command
-        self.sub_cmd_vel = rospy.Subscriber('cmd_vel', Twist,
+        self.sub_cmd_vel = rospy.Subscriber('teleop/cmd_vel', Twist,
                                             self.callback_update_command, queue_size=1)
         # subscriber for velocity command
         self.sub_cmd_vel = rospy.Subscriber('joy', Joy,
