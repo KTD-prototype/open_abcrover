@@ -203,7 +203,7 @@ Button assignment and labels are according to joystick I used : [Locitech F710](
 
 **ROS Messages**  
 * **/joy** : Raw commands from an operator
-* **/cmd_vel** : Velocity command from an operator, with Twist message.
+* **/teleop/cmd_vel** : Velocity command from an operator, with Twist message.
 * **/motor_commands** : Motor comand for each two motors, calculated by PID controller in the velocity_controller node. Regulated not to exceed the motor capacity.
 * **/operation_mode** : Indicates whether remote operation is enabled or not, turbo drive is enabled or not, and check joystick connection or other exceptional states of control system.
 * **/encoder_2wheel** : Incremented encoder data from two motors.
