@@ -38,7 +38,7 @@
     </joint>
 
     <link name="right_wheel">
-        <visual>
+        <visual>    
             <geometry>
                 <mesh filename="package://open_abcrover/description/meshes/wheel_right.stl"/>
             </geometry>
