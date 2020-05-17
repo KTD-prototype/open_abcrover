@@ -1,0 +1,47 @@
+<robot name="open_abcrover">
+    <link name="base_footprint"/>
+
+    <joint name="base_joint" type="fixed">
+        <origin xyz="0 0 0.1332"/>
+        <parent link="base_footprint"/>
+        <child link="base_frame"/>
+    </joint>
+
+    <link name="base_frame">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/base_frame_outdoor.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="base_to_leftwheel" type="continuous">
+        <origin xyz="0.1535 -0.085 -0.057"/>
+        <axis xyz="1 0 0"/>
+        <parent link="base_frame"/>
+        <child link="left_wheel"/>
+    </joint>
+
+    <link name="left_wheel">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/wheel_left.stl"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="base_to_rightwheel" type="continuous">
+        <origin xyz="-0.1535 -0.085 -0.057"/>
+        <axis xyz="1 0 0"/>
+        <parent link="base_frame"/>
+        <child link="right_wheel"/>
+    </joint>
+
+    <link name="right_wheel">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/wheel_right.stl"/>
+            </geometry>
+        </visual>
+    </link>
+</robot>
