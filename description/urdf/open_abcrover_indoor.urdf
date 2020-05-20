@@ -20,7 +20,7 @@
         </collision>
         <inertial>
             <mass value="3.258"/>
-            <inertia ixx="0.026" ixy="-0.0001421" ixz="0.00001997" iyy="0.02" iyz="0.005" izz="0.032"/>
+            <inertia ixx="0.026" ixy="-1.421e-4" ixz="1.997e-5" iyy="0.02" iyz="0.005" izz="0.032"/>
         </inertial>
     </link>
 
@@ -44,7 +44,7 @@
         </collision>
         <inertial>
             <mass value="0.216"/>
-            <inertia ixx="0.0007441" ixy="-0.00000001139" ixz="0.00000005172" iyy="0.0005313" iyz="0.00000004204" izz="0.0005311"/>
+            <inertia ixx="7.441e-4" ixy="-1.139e-8" ixz="5.172e-8" iyy="5.313e-4" iyz="4.204e-8" izz="5.311e-04"/>
         </inertial>
     </link>
 
@@ -68,7 +68,7 @@
         </collision>
         <inertial>
             <mass value="0.216"/>
-            <inertia ixx="0.0007441" ixy="-0.00000001139" ixz="-0.00000005172" iyy="0.0005313" iyz="-0.00000004204" izz="0.0005311"/>
+            <inertia ixx="7.441e-4" ixy="-1.139e-8" ixz="-5.172e-8" iyy="5.313e-4" iyz="-4.204e-8" izz="5.311e-04"/>
         </inertial>
     </link>
 </robot>
