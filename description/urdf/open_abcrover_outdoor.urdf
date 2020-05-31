@@ -10,9 +10,21 @@
     <link name="base_frame">
         <visual>
             <geometry>
-                <mesh filename="package://open_abcrover/description/meshes/base_frame_outdoor.stl"/>
+                <mesh filename="package://open_abcrover/description/meshes/base_frame_outdoor_v4.stl"/>
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/base_frame_outdoor_v4.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="2.802"/>
+            <inertia ixx="0.022" ixy="-1.348e-4" ixz="2.711e-5" iyy="0.02" iyz="-2.73e-5" izz="0.033"/>
+        </inertial>
+        <gazebo>
+            <gravity>true</gravity>
+        </gazebo>
     </link>
 
     <joint name="base_to_leftwheel" type="continuous">
@@ -28,6 +40,15 @@
                 <mesh filename="package://open_abcrover/description/meshes/wheel_left.stl"/>
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/wheel_left.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.216"/>
+            <inertia ixx="7.441e-4" ixy="-1.139e-8" ixz="5.172e-8" iyy="5.313e-4" iyz="4.204e-8" izz="5.311e-04"/>
+        </inertial>
     </link>
 
     <joint name="base_to_rightwheel" type="continuous">
@@ -38,10 +59,133 @@
     </joint>
 
     <link name="right_wheel">
-        <visual>    
+        <visual>
             <geometry>
                 <mesh filename="package://open_abcrover/description/meshes/wheel_right.stl"/>
             </geometry>
         </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/wheel_right.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.216"/>
+            <inertia ixx="7.441e-4" ixy="-1.139e-8" ixz="-5.172e-8" iyy="5.313e-4" iyz="-4.204e-8" izz="5.311e-04"/>
+        </inertial>
     </link>
+
+
+    <!-- TODO set offset origin xyz of pivot and wheel of the casters -->
+    <joint name="base_to_leftcaster_pivot" type="continuous">
+        <origin xyz="0.07 0.10515 -0.0402"/>
+        <axis xyz="0 0 1"/>
+        <parent link="base_frame"/>
+        <child link="left_caster_pivot"/>
+    </joint>
+
+    <link name="left_caster_pivot">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_pivot.stl"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_pivot.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.125"/>
+            <inertia ixx="2.003e-4" ixy="0" ixz="0" iyy="2.033e-4" iyz="3.322e-5" izz="3.133e-05"/>
+        </inertial>
+    </link>
+
+    <joint name="left_caster_pivot_to_wheel" type="continuous">
+        <origin xyz="0 0.02 -0.0555"/>
+        <axis xyz="1 0 0"/>
+        <parent link="left_caster_pivot"/>
+        <child link="left_caster_wheel"/>
+    </joint>
+
+    <link name="left_caster_wheel">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_wheel.stl"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_wheel.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.082"/>
+            <inertia ixx="5.778e-5" ixy="0" ixz="0" iyy="3.163e-5" iyz="0" izz="3.163e-05"/>
+        </inertial>
+    </link>
+
+    <joint name="base_to_rightcaster_pivot" type="continuous">
+        <origin xyz="-0.07 0.10515 -0.0402"/>
+        <axis xyz="0 0 1"/>
+        <parent link="base_frame"/>
+        <child link="right_caster_pivot"/>
+    </joint>
+
+    <link name="right_caster_pivot">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_pivot.stl"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_pivot.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.125"/>
+            <inertia ixx="2.003e-4" ixy="0" ixz="0" iyy="2.033e-4" iyz="3.322e-5" izz="3.133e-05"/>
+        </inertial>
+    </link>
+
+    <joint name="right_caster_pivot_to_wheel" type="continuous">
+        <origin xyz="0 0.02 -0.0555"/>
+        <axis xyz="1 0 0"/>
+        <parent link="right_caster_pivot"/>
+        <child link="right_caster_wheel"/>
+    </joint>
+
+    <link name="right_caster_wheel">
+        <visual>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_wheel.stl"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://open_abcrover/description/meshes/caster_wheel.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.082"/>
+            <inertia ixx="5.778e-5" ixy="0" ixz="0" iyy="3.163e-5" iyz="0" izz="3.163e-05"/>
+        </inertial>
+    </link>
+
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <leftJoint>base_to_leftwheel</leftJoint>
+            <rightJoint>base_to_rightwheel</rightJoint>
+            <robotBaseFrame>base_footprint</robotBaseFrame>
+            <wheelSeparation>0.35</wheelSeparation>
+            <wheelDiameter>0.1524</wheelDiameter>
+            <publishWheelJointState>true</publishWheelJointState>
+        </plugin>
+
+        <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+            <jointName>base_to_leftwheel, base_to_rightwheel</jointName>
+        </plugin>
+    </gazebo>
+
 </robot>
