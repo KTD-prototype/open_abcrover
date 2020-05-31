@@ -1,7 +1,8 @@
 <launch>
     <!-- load urdf file to parameter server -->
-    <param name="robot_description" textfile="$(find open_abcrover)/description/urdf/open_abcrover_indoor.urdf"/>
+    <!-- <param name="robot_description" textfile="$(find open_abcrover)/description/urdf/open_abcrover_indoor.urdf"/> -->
     <!-- <param name="robot_description" textfile="$(find open_abcrover)/description/urdf/open_abcrover_outdoor.urdf"/> -->
+    <param name="robot_description" textfile="$(find open_abcrover)/description/urdf/indoor_realsense_test.urdf"/>
 
     <!-- launch gazebo in an empty world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
